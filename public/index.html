@@ -4225,10 +4225,9 @@
     fontScale: [90, 100, 110],
   });
   const RAIN_COLUMN_WIDTH = 30;
-  const RAIN_FRAME_INTERVAL = 74;
   const RAIN_TRAIL_LENGTH = 5;
-  const RAIN_SPEED = .2;
   const RAIN_GLYPHS = '01<>[]{}#/\\$+-=:;';
+  const VISUAL_PREFERENCES_EVENT = 'lair:visual-preferences-applied';
   const POWER_CONFIRM_WINDOW_MS = 5000;
   const USAGE_RETENTION_DAYS = 45;
   const BOOT_SEEN_KEY = 'hackersLair.cinematicSeen';
@@ -4332,49 +4331,25 @@
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (!canvas || !context) return;
 
-    let columns = [];
-    let animationFrame = 0;
-    let lastFrame = 0;
     let cssWidth = 1;
     let cssHeight = 1;
 
-    function resizeRain() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      cssWidth = Math.max(window.innerWidth, 1);
-      cssHeight = Math.max(window.innerHeight, 1);
-      canvas.width = Math.round(cssWidth * dpr);
-      canvas.height = Math.round(cssHeight * dpr);
-      canvas.style.width = `${cssWidth}px`;
-      canvas.style.height = `${cssHeight}px`;
-      // Draw in CSS pixels; the backing store is scaled up for crisp glyphs on HiDPI.
-      context.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const columnCount = Math.ceil(cssWidth / RAIN_COLUMN_WIDTH);
-      const rowCount = Math.ceil(cssHeight / RAIN_COLUMN_WIDTH);
-      columns = Array.from({ length: columnCount }, (_, index) => (
-        columns[index] ?? -Math.floor(Math.random() * rowCount)
-      ));
-      context.font = `600 14px ${getComputedStyle(document.documentElement).getPropertyValue('--mono')}`;
-      context.textAlign = 'center';
-      context.textBaseline = 'middle';
-    }
-
-    function drawRain(timestamp) {
-      animationFrame = requestAnimationFrame(drawRain);
-      if (timestamp - lastFrame < RAIN_FRAME_INTERVAL) return;
-      lastFrame = timestamp;
+    function renderRain() {
       context.clearRect(0, 0, cssWidth, cssHeight);
-      if (document.documentElement.dataset.motion === 'reduced') return;
+      if (reducedMotion.matches || document.documentElement.dataset.motion === 'reduced') return;
 
       const rowCount = Math.ceil(cssHeight / RAIN_COLUMN_WIDTH);
+      const columnCount = Math.ceil(cssWidth / RAIN_COLUMN_WIDTH);
       const halfColumn = RAIN_COLUMN_WIDTH / 2;
       const theme = getComputedStyle(document.documentElement);
       const leadColor = theme.getPropertyValue('--cyan').trim();
       const trailColor = theme.getPropertyValue('--green').trim();
-      columns.forEach((drop, column) => {
+      Array.from({ length: columnCount }, (_, column) => {
+        const drop = Math.floor(Math.random() * (rowCount + RAIN_TRAIL_LENGTH));
         const x = (column * RAIN_COLUMN_WIDTH) + halfColumn;
         for (let trail = 0; trail < RAIN_TRAIL_LENGTH; trail += 1) {
           const row = drop - trail;
-          if (row < 0) continue;
+          if (row < 0 || row > rowCount) continue;
           const alpha = (RAIN_TRAIL_LENGTH - trail) / RAIN_TRAIL_LENGTH;
           if (trail === 0) {
             context.fillStyle = leadColor;
@@ -4391,35 +4366,29 @@
         }
         context.globalAlpha = 1;
         context.shadowBlur = 0;
-
-        columns[column] += RAIN_SPEED + ((column % 4) * .02);
-        if (columns[column] - RAIN_TRAIL_LENGTH > rowCount && Math.random() > .86) {
-          columns[column] = -Math.floor(Math.random() * 14);
-        }
       });
     }
 
-    function stopRain() {
-      cancelAnimationFrame(animationFrame);
-      animationFrame = 0;
-      context.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    function syncRain() {
-      const shouldRun = !reducedMotion.matches && !document.hidden;
-      if (shouldRun && !animationFrame) {
-        lastFrame = 0;
-        animationFrame = requestAnimationFrame(drawRain);
-      } else if (!shouldRun && animationFrame) {
-        stopRain();
-      }
+    function resizeRain() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cssWidth = Math.max(window.innerWidth, 1);
+      cssHeight = Math.max(window.innerHeight, 1);
+      canvas.width = Math.round(cssWidth * dpr);
+      canvas.height = Math.round(cssHeight * dpr);
+      canvas.style.width = `${cssWidth}px`;
+      canvas.style.height = `${cssHeight}px`;
+      // Draw in CSS pixels; the backing store is scaled up for crisp glyphs on HiDPI.
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      context.font = `600 14px ${getComputedStyle(document.documentElement).getPropertyValue('--mono')}`;
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      renderRain();
     }
 
     resizeRain();
     window.addEventListener('resize', resizeRain);
-    document.addEventListener('visibilitychange', syncRain);
-    reducedMotion.addEventListener('change', syncRain);
-    syncRain();
+    window.addEventListener(VISUAL_PREFERENCES_EVENT, renderRain);
+    reducedMotion.addEventListener('change', renderRain);
   }
 
   function installCinematicMode() {
@@ -4576,6 +4545,7 @@
     const osReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     root.dataset.motion = osReducedMotion ? 'reduced' : normalized.motion;
     root.style.setProperty('--font-scale', `${normalized.fontScale}%`);
+    window.dispatchEvent(new Event(VISUAL_PREFERENCES_EVENT));
     $('themePreference').value = normalized.theme;
     $('densityPreference').value = normalized.density;
     $('motionPreference').value = normalized.motion;

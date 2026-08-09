@@ -196,6 +196,33 @@ def assert_first_run_setup(page) -> None:
     expect(dialog).to_be_hidden()
 
 
+def assert_full_motion_canvas_settles(page) -> None:
+    page.evaluate(
+        """() => {
+          window.__signalRainPaints = 0;
+          window.__originalCanvasFillText = CanvasRenderingContext2D.prototype.fillText;
+          CanvasRenderingContext2D.prototype.fillText = function(...args) {
+            if (this.canvas?.id === 'signalRain') window.__signalRainPaints += 1;
+            return window.__originalCanvasFillText.apply(this, args);
+          };
+          applyUiPreferences({ ...state.uiPreferences, motion: 'full' });
+        }"""
+    )
+    page.wait_for_timeout(250)
+    settled_paints = page.evaluate("window.__signalRainPaints")
+    page.wait_for_timeout(1_250)
+    final_paints = page.evaluate("window.__signalRainPaints")
+    assert final_paints == settled_paints, (
+        "Motion On continuously repainted the full-window signal canvas: "
+        f"{final_paints - settled_paints} additional glyph paints after settling."
+    )
+    page.evaluate(
+        """() => {
+          CanvasRenderingContext2D.prototype.fillText = window.__originalCanvasFillText;
+        }"""
+    )
+
+
 def assert_empty_state(page) -> None:
     empty_state = page.locator("#emptyState")
     expect(empty_state).to_be_visible()
@@ -1133,6 +1160,7 @@ def run() -> None:
             script_name = write_script_fixture(data_directory) if os.name == "nt" else None
             page.reload(wait_until="networkidle")
             expect(page.get_by_role("dialog", name="Commission Your Lair")).to_be_hidden()
+            assert_full_motion_canvas_settles(page)
             assert_empty_state(page)
             assert_project_editor_controls(page, data_directory / "chosen-folder")
             assert_project_port_conflict(
