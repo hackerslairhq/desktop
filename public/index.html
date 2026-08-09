@@ -2294,38 +2294,9 @@
   .model-channel.unavailable .model-state { color: var(--red); }
 
   .model-switch {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 5px;
+    justify-self: end;
+    min-width: 0;
   }
-
-  .model-toggle {
-    min-height: 36px;
-    border: 1px solid var(--line-strong);
-    border-radius: 3px;
-    color: var(--dim);
-    background: rgba(var(--surface-strong-rgb), .6);
-    cursor: pointer;
-    font: 900 9px var(--mono);
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    transition: border-color .16s, color .16s, background .16s, box-shadow .16s;
-  }
-
-  .model-toggle.on:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
-  .model-toggle.off:hover:not(:disabled) { border-color: var(--red); color: var(--red); }
-  .model-toggle.on.active {
-    border-color: rgba(var(--accent-rgb), .62);
-    color: var(--green);
-    background: rgba(var(--accent-rgb), .1);
-    box-shadow: inset 0 0 14px rgba(var(--accent-rgb), .06);
-  }
-  .model-toggle.off.active {
-    border-color: rgba(var(--secondary-rgb), .34);
-    color: var(--cyan);
-  }
-  .model-toggle:disabled { opacity: .36; cursor: not-allowed; }
-  .model-toggle:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 
   .model-note.error { color: var(--red); }
 
@@ -4846,9 +4817,10 @@
               <span class="model-state">${esc(displayState.label)}</span>
             </div>
             <span class="model-path" title="${esc(model.files?.model || '')}">${esc(model.files?.model || '')}</span>
-            <div class="model-switch" aria-label="${esc(model.name)} power controls">
-              <button class="model-toggle on ${active ? 'active' : ''}" type="button" data-model-action="start" data-model-id="${esc(model.id)}" aria-pressed="${String(active)}" title="${esc(startDisabled && blockedByOther ? 'Stop the active model first.' : missing || `Start ${model.name}`)}" ${startDisabled ? 'disabled' : ''}>On</button>
-              <button class="model-toggle off ${active ? '' : 'active'}" type="button" data-model-action="stop" data-model-id="${esc(model.id)}" aria-pressed="${String(!active)}" title="${esc(active ? `Stop ${model.name}` : `${model.name} is offline`)}" ${stopDisabled ? 'disabled' : ''}>Off</button>
+            <div class="model-switch action-cluster compact" aria-label="${esc(model.name)} power controls">
+              ${active
+                ? `<button class="action terminate" type="button" data-model-action="stop" data-model-id="${esc(model.id)}" title="${esc(`Stop ${model.name}`)}" ${stopDisabled ? 'disabled' : ''}>Off</button>`
+                : `<button class="action initiate" type="button" data-model-action="start" data-model-id="${esc(model.id)}" title="${esc(startDisabled && blockedByOther ? 'Stop the active model first.' : missing || `Start ${model.name}`)}" ${startDisabled ? 'disabled' : ''}>On</button>`}
             </div>
           </section>
         `;

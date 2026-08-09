@@ -435,12 +435,18 @@ def assert_local_model_controls(page) -> None:
     prompt_dialog.get_by_role("button", name="Close agent prompts").click()
     expect(prompt_dialog).to_be_hidden()
 
+    coder_actions = coder.locator(".model-switch .action")
+    expect(coder_actions).to_have_count(1)
+    expect(coder_actions).to_have_class(re.compile(r"\binitiate\b"))
     expect(coder.get_by_role("button", name="On", exact=True)).to_be_enabled()
-    expect(coder.get_by_role("button", name="Off", exact=True)).to_be_disabled()
+    expect(coder.get_by_role("button", name="Off", exact=True)).to_have_count(0)
 
     coder.get_by_role("button", name="On", exact=True).click()
     expect(coder.locator(".model-state")).to_have_text("ONLINE")
     expect(model_35b.get_by_role("button", name="On", exact=True)).to_be_disabled()
+    expect(coder.get_by_role("button", name="On", exact=True)).to_have_count(0)
+    expect(coder_actions).to_have_count(1)
+    expect(coder_actions).to_have_class(re.compile(r"\bterminate\b"))
     expect(coder.get_by_role("button", name="Off", exact=True)).to_be_enabled()
     OUTPUT_DIRECTORY.mkdir(exist_ok=True)
     page.screenshot(
@@ -450,6 +456,8 @@ def assert_local_model_controls(page) -> None:
 
     coder.get_by_role("button", name="Off", exact=True).click()
     expect(coder.locator(".model-state")).to_have_text("OFFLINE")
+    expect(coder.get_by_role("button", name="Off", exact=True)).to_have_count(0)
+    expect(coder_actions).to_have_class(re.compile(r"\binitiate\b"))
     expect(model_35b.get_by_role("button", name="On", exact=True)).to_be_enabled()
     page.get_by_role("tab", name="Targets", exact=True).click()
     page.unroute("**/api/local-models", handle)
