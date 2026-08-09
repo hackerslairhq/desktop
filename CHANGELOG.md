@@ -7,8 +7,31 @@ and this project follows [Semantic Versioning](VERSIONING.md).
 
 ## [Unreleased]
 
+## [2.1.0-beta.12] - 2026-08-09
+
+### Added
+
+- Added native Windows Local Models controls for the reviewed llama.cpp Vulkan
+  channels, with artifact-aware availability, an exclusive one-model interlock,
+  and direct On/Off control from the desktop console.
+- Added a machine-aware Agent Prompts library in Settings for extending Targets,
+  Skills, Automation, and Local Models after initial setup.
+- Added one first-launch setup handoff with Targets, Skills, Automation, and
+  Local Models selected by default and independently removable from the prompt.
+
+### Changed
+
+- AI Workflow is enabled by default on new installations while remaining local,
+  transcript-free, and independently switchable from Settings.
+- Local Models now uses the same single contextual action tray as Targets: On
+  while offline and Off while online.
+
 ### Fixed
 
+- Motion On no longer continuously repaints the full-window signal-rain canvas,
+  eliminating its sustained main-thread rendering cost.
+- An empty target registry now offers a recovery prompt even when other setup
+  areas already exist, and checks prior registries before rebuilding anything.
 - PowerShell updates now wait for short-lived Windows file locks to clear when
   replacing an existing installation, so repeat installs complete in one run.
 
@@ -226,7 +249,8 @@ and this project follows [Semantic Versioning](VERSIONING.md).
 - Added Host validation, JSON-only mutations, restrictive CSP, origin-checked
   desktop IPC, action locks, and last-known-good config behavior.
 
-[Unreleased]: https://github.com/hackerslairhq/desktop/compare/v2.1.0-beta.11...HEAD
+[Unreleased]: https://github.com/hackerslairhq/desktop/compare/v2.1.0-beta.12...HEAD
+[2.1.0-beta.12]: https://github.com/hackerslairhq/desktop/compare/v2.1.0-beta.11...v2.1.0-beta.12
 [2.1.0-beta.11]: https://github.com/hackerslairhq/desktop/compare/v2.1.0-beta.10...v2.1.0-beta.11
 [2.1.0-beta.10]: https://github.com/hackerslairhq/desktop/compare/v2.1.0-beta.9...v2.1.0-beta.10
 [2.1.0-beta.9]: https://github.com/hackerslairhq/desktop/compare/v2.1.0-beta.8...v2.1.0-beta.9

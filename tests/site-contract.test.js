@@ -269,9 +269,10 @@ test('getting started presents the recommended agent path before guided setup', 
   assert.doesNotMatch(guide, /second empty-state path/i);
 });
 
-test('AI workflow docs state the opt-in and offline privacy boundary', () => {
+test('AI workflow docs state the default-on and offline privacy boundary', () => {
   const guide = fs.readFileSync(path.join(site, 'docs', 'ai-workflow.html'), 'utf8');
-  assert.match(guide, /Skills scanning is off on a new install/i);
+  assert.match(guide, /AI Workflow<\/strong> is on for new installs/i);
+  assert.match(guide, /can be switched off in Settings/i);
   assert.match(guide, /does not scan agent transcripts/i);
   assert.doesNotMatch(guide, /Session summaries have a separate switch/i);
   assert.match(guide, /normal scans never use the network/i);

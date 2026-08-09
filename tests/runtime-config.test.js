@@ -27,7 +27,7 @@ test('initializes sanitized runtime configuration outside the repository', (t) =
     JSON.stringify({
       $schema: './settings.schema.json',
       configVersion: 4,
-      enableSkills: false,
+      enableSkills: true,
       enableScripts: false,
       browserPath: '',
       zombieAfterHours: 8,
@@ -68,7 +68,7 @@ test('initializes sanitized runtime configuration outside the repository', (t) =
   assert.ok(fs.existsSync(path.join(data, 'settings.json')));
   assert.ok(fs.existsSync(path.join(data, 'skill-ratings.json')));
   const defaultSettings = runtime.settings.read().value;
-  assert.equal(defaultSettings.enableSkills, false);
+  assert.equal(defaultSettings.enableSkills, true);
   assert.equal(defaultSettings.enableScripts, false);
   assert.deepEqual(defaultSettings.uiPreferences, DEFAULT_UI_PREFERENCES);
   assert.deepEqual(defaultSettings.aiWorkflow, {

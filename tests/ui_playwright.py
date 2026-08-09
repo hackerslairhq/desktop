@@ -155,16 +155,88 @@ def project_fixture(
     }
 
 
+def assert_first_run_setup(page) -> None:
+    dialog = page.get_by_role("dialog", name="Commission Your Lair")
+    expect(dialog).to_be_visible()
+    for section in ["Targets", "Skills", "Automation", "Local Models"]:
+        expect(dialog.get_by_role("checkbox", name=section, exact=True)).to_be_checked()
+    expect(dialog.get_by_text("One complete prompt", exact=True)).to_be_visible()
+    expect(dialog.locator("#firstRunSetupPrompt")).to_contain_text(
+        "Set up the selected Hacker's Lair areas for this machine"
+    )
+    expect(dialog.locator("#firstRunSetupPrompt")).to_contain_text("Local Models")
+    expect(dialog.locator("pre")).to_have_count(1)
+    expect(dialog).to_contain_text("Settings → Agent Prompts")
+    dialog.get_by_role("checkbox", name="Local Models", exact=True).uncheck()
+    expect(dialog.locator("#firstRunSetupPrompt")).not_to_contain_text(
+        "Set up Hacker's Lair Local Models"
+    )
+    dialog.get_by_role("checkbox", name="Skills", exact=True).uncheck()
+    expect(dialog.locator("#firstRunSetupPrompt")).not_to_contain_text(
+        "canonical workspace skill directory"
+    )
+    dialog.get_by_role("checkbox", name="Local Models", exact=True).check()
+    dialog.get_by_role("checkbox", name="Skills", exact=True).check()
+    dialog.get_by_role("button", name="Copy Full Setup Prompt", exact=True).click()
+    expect(
+        dialog.get_by_role("button", name="Copied · Paste Into Your Agent", exact=True)
+    ).to_be_visible()
+    OUTPUT_DIRECTORY.mkdir(exist_ok=True)
+    page.screenshot(
+        path=str(OUTPUT_DIRECTORY / "first-run-setup-1440x900.png"),
+        full_page=False,
+    )
+    page.set_viewport_size({"width": 900, "height": 620})
+    expect(dialog).to_be_visible()
+    assert not page.evaluate(
+        "document.documentElement.scrollWidth > document.documentElement.clientWidth"
+    ), "First-run setup has horizontal overflow at 900x620."
+    page.set_viewport_size({"width": 1440, "height": 900})
+    dialog.get_by_role("button", name="Close first-run setup").click()
+    expect(dialog).to_be_hidden()
+
+
+def assert_full_motion_canvas_settles(page) -> None:
+    page.evaluate(
+        """() => {
+          window.__signalRainPaints = 0;
+          window.__originalCanvasFillText = CanvasRenderingContext2D.prototype.fillText;
+          CanvasRenderingContext2D.prototype.fillText = function(...args) {
+            if (this.canvas?.id === 'signalRain') window.__signalRainPaints += 1;
+            return window.__originalCanvasFillText.apply(this, args);
+          };
+          applyUiPreferences({ ...state.uiPreferences, motion: 'full' });
+        }"""
+    )
+    page.wait_for_timeout(250)
+    settled_paints = page.evaluate("window.__signalRainPaints")
+    page.wait_for_timeout(1_250)
+    final_paints = page.evaluate("window.__signalRainPaints")
+    assert final_paints == settled_paints, (
+        "Motion On continuously repainted the full-window signal canvas: "
+        f"{final_paints - settled_paints} additional glyph paints after settling."
+    )
+    page.evaluate(
+        """() => {
+          CanvasRenderingContext2D.prototype.fillText = window.__originalCanvasFillText;
+        }"""
+    )
+
+
 def assert_empty_state(page) -> None:
-    page.goto(page.url, wait_until="networkidle")
     empty_state = page.locator("#emptyState")
     expect(empty_state).to_be_visible()
-    expect(empty_state.get_by_text("Set up with wizard")).to_be_visible()
-    expect(empty_state.get_by_text("Copy prompt for your AI agent")).to_be_visible()
-    expect(empty_state.get_by_text("Recommended", exact=True)).to_be_visible()
-    setup_paths = empty_state.locator(".onboarding-paths > .onboarding-path")
-    expect(setup_paths.nth(0)).to_contain_text("Agent-assisted")
-    expect(setup_paths.nth(1)).to_contain_text("Guided setup")
+    expect(empty_state).to_contain_text("No targets loaded")
+    recovery = empty_state.get_by_role("region", name="Target registry recovery")
+    expect(recovery).to_contain_text("Your project folders may still be intact")
+    expect(recovery.locator("pre")).to_contain_text("prior valid projects.json")
+    OUTPUT_DIRECTORY.mkdir(exist_ok=True)
+    page.screenshot(
+        path=str(OUTPUT_DIRECTORY / "target-recovery-1440x900.png"),
+        full_page=False,
+    )
+    recovery.get_by_role("button", name="Copy recovery prompt", exact=True).click()
+    expect(recovery.get_by_role("button", name="Copied", exact=True)).to_be_visible()
 
 
 def assert_project_editor_controls(page, selected_folder: Path) -> None:
@@ -249,6 +321,148 @@ def assert_target_states(page, live_port: int, dormant_port: int) -> None:
         assert tray_box["width"] <= action_box["width"] + 20
 
     assert "N/A" not in page.locator("body").inner_text()
+
+
+def assert_local_model_controls(page) -> None:
+    active_model: dict[str, str | None] = {"id": None}
+    setup_ready = {"value": False}
+    models = [
+        {
+            "id": "qwen3-coder-next",
+            "name": "Qwen3 Coder Next",
+            "quant": "UD-Q3_K_XL",
+            "generationTokensPerSecond": 28.22,
+            "source": "unsloth/Qwen3-Coder-Next-GGUF",
+            "modelFile": "Qwen3-Coder-Next-UD-Q3_K_XL.gguf",
+        },
+        {
+            "id": "qwen3.6-35b-a3b",
+            "name": "Qwen3.6 35B A3B",
+            "quant": "UD-Q6_K",
+            "generationTokensPerSecond": 26.54,
+            "source": "unsloth/Qwen3.6-35B-A3B-GGUF",
+            "modelFile": "Qwen3.6-35B-A3B-UD-Q6_K.gguf",
+        },
+    ]
+
+    def payload() -> dict:
+        return {
+            "supported": True,
+            "rootDirectory": "C:\\llama.cpp",
+            "port": 8080,
+            "activeModelId": active_model["id"],
+            "conflict": None,
+            "models": [
+                {
+                    **model,
+                    "available": setup_ready["value"],
+                    "missing": [] if setup_ready["value"] else ["model"],
+                    "state": "running" if active_model["id"] == model["id"] else "stopped",
+                    "ready": active_model["id"] == model["id"],
+                    "pids": [4242] if active_model["id"] == model["id"] else [],
+                    "files": {"model": f"C:\\llama.cpp\\models\\{model['modelFile']}"},
+                }
+                for model in models
+            ],
+        }
+
+    def handle(route) -> None:
+        request = route.request
+        if request.url.endswith("/setup-prompt"):
+            route.fulfill(
+                json={
+                    "prompt": "Set up Hacker's Lair Local Models at C:\\llama.cpp.\n"
+                    "Use Vulkan and never run both models at once."
+                }
+            )
+            return
+        if request.method == "POST":
+            body = request.post_data_json
+            active_model["id"] = body["id"] if request.url.endswith("/start") else None
+            route.fulfill(json={"ok": True, "id": body["id"]})
+            return
+        route.fulfill(json=payload())
+
+    page.route("**/api/local-models", handle)
+    page.route("**/api/local-models/**", handle)
+    page.get_by_role("tab", name="Local Models", exact=True).click()
+    page.evaluate("Promise.all([loadLocalModels(true), loadLocalInferencePrompt(true)])")
+    panel = page.locator(".local-inference-deck")
+    channels = panel.locator(".model-channel")
+    expect(channels).to_have_count(2)
+    coder = channels.filter(has_text="Qwen3 Coder Next")
+    model_35b = channels.filter(has_text="Qwen3.6 35B A3B")
+    expect(coder).to_contain_text("UD-Q3_K_XL · 28.22 gen tok/s")
+    expect(model_35b).to_contain_text("UD-Q6_K · 26.54 gen tok/s")
+    expect(panel.get_by_text("Set up this machine with your agent", exact=True)).to_be_visible()
+    expect(panel.locator(".agent-prompt")).to_contain_text("Use Vulkan")
+    panel.get_by_role("button", name="Copy agent prompt", exact=True).click()
+    expect(panel.get_by_role("button", name="Copied", exact=True)).to_be_visible()
+    page.set_viewport_size({"width": 900, "height": 620})
+    assert not page.evaluate(
+        "document.documentElement.scrollWidth > document.documentElement.clientWidth"
+    ), "Local Models has horizontal overflow at 900x620."
+    page.set_viewport_size({"width": 1440, "height": 900})
+    setup_ready["value"] = True
+    page.evaluate("loadLocalModels(true)")
+    expect(panel.locator(".local-agent-handoff")).to_have_count(0)
+    expect(panel.get_by_text("Setup complete", exact=False)).to_have_count(0)
+    unused_space_below_deck = page.evaluate(
+        """() => {
+          const matrix = document.querySelector('.matrix').getBoundingClientRect();
+          const deck = document.querySelector('.local-inference-deck').getBoundingClientRect();
+          return matrix.bottom - deck.bottom;
+        }"""
+    )
+    assert unused_space_below_deck <= 20, (
+        f"Local Models reserves {unused_space_below_deck}px below its content."
+    )
+
+    page.get_by_role("button", name="Settings", exact=True).click()
+    page.get_by_role("button", name=re.compile(r"Agent prompts")).click()
+    prompt_dialog = page.get_by_role("dialog", name="Agent Prompts")
+    expect(prompt_dialog).to_be_visible()
+    model_prompt = prompt_dialog.locator('[data-prompt-library-id="local-models"]')
+    expect(model_prompt).to_contain_text("Local Models setup")
+    expect(model_prompt.locator("pre")).to_contain_text("Use Vulkan")
+    OUTPUT_DIRECTORY.mkdir(exist_ok=True)
+    page.screenshot(
+        path=str(OUTPUT_DIRECTORY / "agent-prompts-1440x900.png"),
+        full_page=False,
+    )
+    model_prompt.get_by_role("button", name="Copy prompt", exact=True).click()
+    expect(model_prompt.get_by_role("button", name="Copied", exact=True)).to_be_visible()
+    prompt_dialog.get_by_role("button", name="Close agent prompts").click()
+    expect(prompt_dialog).to_be_hidden()
+
+    coder_actions = coder.locator(".model-switch .action")
+    expect(coder_actions).to_have_count(1)
+    expect(coder_actions).to_have_class(re.compile(r"\binitiate\b"))
+    expect(coder.get_by_role("button", name="On", exact=True)).to_be_enabled()
+    expect(coder.get_by_role("button", name="Off", exact=True)).to_have_count(0)
+
+    coder.get_by_role("button", name="On", exact=True).click()
+    expect(coder.locator(".model-state")).to_have_text("ONLINE")
+    expect(model_35b.get_by_role("button", name="On", exact=True)).to_be_disabled()
+    expect(coder.get_by_role("button", name="On", exact=True)).to_have_count(0)
+    expect(coder_actions).to_have_count(1)
+    expect(coder_actions).to_have_class(re.compile(r"\bterminate\b"))
+    expect(coder.get_by_role("button", name="Off", exact=True)).to_be_enabled()
+    OUTPUT_DIRECTORY.mkdir(exist_ok=True)
+    page.screenshot(
+        path=str(OUTPUT_DIRECTORY / "local-model-controls-1440x900.png"),
+        full_page=False,
+    )
+
+    coder.get_by_role("button", name="Off", exact=True).click()
+    expect(coder.locator(".model-state")).to_have_text("OFFLINE")
+    expect(coder.get_by_role("button", name="Off", exact=True)).to_have_count(0)
+    expect(coder_actions).to_have_class(re.compile(r"\binitiate\b"))
+    expect(model_35b.get_by_role("button", name="On", exact=True)).to_be_enabled()
+    page.get_by_role("tab", name="Targets", exact=True).click()
+    page.unroute("**/api/local-models", handle)
+    page.unroute("**/api/local-models/**", handle)
+    page.evaluate("loadLocalModels(true)")
 
 
 def assert_port_signal_action_tray(page, live_port: int) -> None:
@@ -422,12 +636,14 @@ def assert_settings_panel(page, scripts_supported: bool) -> None:
     expect(page.locator("html")).to_have_attribute("style", re.compile(r"--font-scale:\s*110%"))
     expect(page.locator("#settingsSync")).to_have_text("Saved")
 
-    skills = page.get_by_role("switch", name=re.compile(r"Skills panel"))
+    skills = page.get_by_role("switch", name=re.compile(r"AI Workflow"))
     scripts = page.get_by_role("switch", name=re.compile(r"Scripts panel"))
-    expect(skills).not_to_be_checked()
-    expect(page.locator("#skillsTab")).to_be_hidden()
+    expect(skills).to_be_checked()
+    expect(page.locator("#skillsTab")).to_be_visible()
     expect(page.locator("#scriptsTab")).to_be_hidden()
 
+    skills.uncheck()
+    expect(page.locator("#skillsTab")).to_be_hidden()
     skills.check()
     expect(page.locator("#skillsTab")).to_be_visible()
     expect(page.locator("#settingsPopover")).not_to_contain_text("Usage stats")
@@ -776,18 +992,10 @@ def run() -> None:
     live_directory.mkdir()
     dormant_directory.mkdir()
     write_projects(data_directory, [])
-    script_name = write_script_fixture(data_directory) if os.name == "nt" else None
+    script_name = None
     agents_home = data_directory / "agents"
+    agents_home.mkdir()
     verify_skill = agents_home / "skills" / "verify"
-    verify_skill.mkdir(parents=True)
-    (verify_skill / "SKILL.md").write_text(
-        "---\n"
-        "name: verify\n"
-        "description: Verify repository changes through public interfaces before release.\n"
-        "---\n\n"
-        "# Verify\n",
-        encoding="utf-8",
-    )
     (agents_home / "usage-log.jsonl").write_text(
         "\n".join(
             json.dumps(event)
@@ -870,6 +1078,7 @@ def run() -> None:
         "AGENTS_HOME": str(agents_home),
         "CLAUDE_CONFIG_DIR": str(claude_home),
         "LAIR_WORKSPACE_ROOT": str(data_directory),
+        "LLAMA_CPP_ROOT": str(data_directory / "missing-llama-root"),
     }
     service = subprocess.Popen(
         ["node", str(ROOT / "server.js")],
@@ -955,6 +1164,20 @@ def run() -> None:
                 """
             )
             page.goto(origin, wait_until="domcontentloaded")
+            assert_first_run_setup(page)
+            verify_skill.mkdir(parents=True)
+            (verify_skill / "SKILL.md").write_text(
+                "---\n"
+                "name: verify\n"
+                "description: Verify repository changes through public interfaces before release.\n"
+                "---\n\n"
+                "# Verify\n",
+                encoding="utf-8",
+            )
+            script_name = write_script_fixture(data_directory) if os.name == "nt" else None
+            page.reload(wait_until="networkidle")
+            expect(page.get_by_role("dialog", name="Commission Your Lair")).to_be_hidden()
+            assert_full_motion_canvas_settles(page)
             assert_empty_state(page)
             assert_project_editor_controls(page, data_directory / "chosen-folder")
             assert_project_port_conflict(
@@ -983,6 +1206,7 @@ def run() -> None:
                 ],
             )
             assert_target_states(page, live_listener.port, dormant_port)
+            assert_local_model_controls(page)
             assert_compact_desktop_layout(page)
             assert_port_signal_action_tray(page, live_listener.port)
             assert_minimal_update_controls(page)

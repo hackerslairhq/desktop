@@ -1,7 +1,7 @@
 {
   "name": "hackers-lair",
   "productName": "Hacker's Lair",
-  "version": "2.1.0-beta.11",
+  "version": "2.1.0-beta.12",
   "description": "Local-first desktop console for coding projects, processes, ports, and logs.",
   "author": "Hacker's Lair contributors",
   "license": "MIT",

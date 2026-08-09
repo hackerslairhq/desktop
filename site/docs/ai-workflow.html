@@ -17,10 +17,10 @@
     <article class="docs-content">
       <div class="eyebrow">Guide 04 // agent operations</div>
       <h1>Maintain the workflow around your agents.</h1>
-      <p class="lede">The optional Skills area turns Hacker's Lair into a local maintenance console for reusable skills, subagents, slash commands, workspace instructions, MCP definitions, permissions, hooks, and memory. Its analysis is deterministic; the app does not call an LLM.</p>
+      <p class="lede">The AI Workflow area turns Hacker's Lair into a local maintenance console for reusable skills, subagents, slash commands, workspace instructions, MCP definitions, permissions, hooks, and memory. Its analysis is deterministic; the app does not call an LLM.</p>
 
       <h2 id="privacy">Privacy defaults</h2>
-      <p>Skills scanning is off on a new install because it reads agent configuration outside project folders. Enable <strong>Skills panel</strong> in Settings when you want it. Hacker's Lair does not scan agent transcripts; the optional workflow area reads only the explicit usage-event log and configured workflow files.</p>
+      <p><strong>AI Workflow</strong> is on for new installs and can be switched off in Settings. Its scans remain local and read only configured workflow files plus the explicit usage-event log. Hacker's Lair does not scan agent transcripts.</p>
       <div class="docs-callout"><strong>Network boundary:</strong> normal scans never use the network. “Check links” is the only workflow-maintenance network action; it runs only after a button press, uses a five-second HEAD request, and caches the result locally for seven days. There is no telemetry, analytics, account, or hosted service.</div>
 
       <h2 id="usage">Local usage counts</h2>

@@ -1005,7 +1005,10 @@
   .cinematic-ready .intel { animation-delay: 1.62s; }
   .cinematic-ready .feed-panel { animation-delay: 1.76s; }
 
-  .matrix { grid-area: matrix; }
+  .matrix {
+    grid-area: matrix;
+    align-self: start;
+  }
   .side-rack {
     grid-area: side;
     display: grid;
@@ -1571,32 +1574,15 @@
     text-transform: uppercase;
   }
 
-  .onboarding {
-    display: grid;
-    gap: 14px;
-    max-width: 880px;
-    margin: 0 auto;
+  .empty.target-recovery-empty {
+    padding: 16px;
     text-align: left;
     text-transform: none;
   }
 
-  .onboarding-intro {
-    display: grid;
-    gap: 5px;
-    border-left: 2px solid var(--cyan);
-    padding-left: 12px;
-  }
-
-  .onboarding-intro strong {
-    color: var(--text);
-    font-size: 14px;
-    text-transform: uppercase;
-  }
-
-  .onboarding-intro span {
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.55;
+  .target-recovery-empty .agent-assisted-card {
+    max-width: 760px;
+    margin: 0 auto;
   }
 
   .card-toggle {
@@ -1647,34 +1633,6 @@
     margin-top: 0;
   }
 
-  .onboarding-paths {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .onboarding-path {
-    display: flex;
-    flex-direction: column;
-    gap: 11px;
-    min-width: 0;
-    border: 1px solid rgba(var(--secondary-rgb), .2);
-    border-radius: 5px;
-    padding: 15px;
-    background: rgba(var(--shadow-rgb), .22);
-  }
-
-  .onboarding-path.agent {
-    border-color: rgba(var(--accent-rgb), .24);
-  }
-
-  .onboarding-path .section-kicker { margin-bottom: -4px; }
-  .onboarding-path .setup-path-kicker {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 7px;
-    align-items: center;
-  }
   .setup-recommendation {
     padding: 2px 6px;
     border: 1px solid rgba(var(--accent-rgb), .42);
@@ -1685,29 +1643,6 @@
     line-height: 1.2;
     letter-spacing: .09em;
   }
-  .onboarding-path h3 {
-    margin: 0;
-    color: var(--text);
-    font-size: 14px;
-    text-transform: uppercase;
-  }
-  .onboarding-path > p {
-    margin: 0;
-    color: var(--muted);
-    font-size: 11px;
-    line-height: 1.55;
-  }
-  .onboarding-path .utility { margin-top: auto; align-self: flex-start; }
-
-  .prompt-card {
-    display: grid;
-    gap: 10px;
-    border: 1px solid rgba(var(--secondary-rgb), .2);
-    border-radius: 5px;
-    padding: 14px;
-    background: rgba(var(--shadow-rgb), .22);
-  }
-
   .ai-workflow-console {
     display: grid;
     gap: 12px;
@@ -2153,38 +2088,6 @@
   .context-source code { min-width: 0; overflow: hidden; color: var(--dim); text-overflow: ellipsis; white-space: nowrap; }
   .context-source strong { color: var(--text); }
 
-  .prompt-head {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .prompt-head strong {
-    color: var(--cyan);
-    font-size: 11px;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-  }
-
-  .copy-prompt {
-    min-width: 94px;
-    border-color: rgba(var(--accent-rgb), .28);
-    color: var(--green);
-    background: rgba(var(--accent-rgb), .05);
-  }
-
-  .prompt-card pre {
-    margin: 0;
-    max-height: 260px;
-    overflow: auto;
-    overflow-wrap: anywhere;
-    color: var(--text);
-    font: 11px/1.6 Consolas, "Courier New", monospace;
-    word-break: break-word;
-    white-space: pre-wrap;
-  }
-
   .intel {
     align-self: start;
     padding-bottom: 8px;
@@ -2235,6 +2138,265 @@
     height: 100%;
     background: linear-gradient(90deg, rgba(var(--accent-rgb), .9), rgba(var(--secondary-rgb), .82));
     transition: width .2s;
+  }
+
+  .local-inference-deck { display: grid; gap: 14px; }
+
+  .inference-contract {
+    display: grid;
+    grid-template-columns: minmax(220px, .8fr) minmax(0, 1.2fr);
+    gap: 18px;
+    align-items: end;
+    padding: 17px 18px;
+    border: 1px solid rgba(var(--secondary-rgb), .22);
+    border-left: 3px solid var(--cyan);
+    border-radius: 4px;
+    background:
+      linear-gradient(105deg, rgba(var(--secondary-rgb), .07), transparent 48%),
+      rgba(var(--surface-strong-rgb), .72);
+  }
+
+  .inference-contract h3,
+  .inference-contract p { margin: 0; }
+
+  .inference-contract h3 {
+    margin-top: 4px;
+    color: var(--text);
+    font-size: 16px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .inference-contract p {
+    max-width: 58ch;
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.55;
+  }
+
+  .inference-contract-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(90px, .5fr));
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .inference-contract-cell {
+    min-width: 0;
+    padding: 9px 10px;
+    border-left: 1px solid var(--line);
+    background: rgba(var(--shadow-rgb), .24);
+  }
+
+  .inference-contract-cell:first-child { border-left: 0; }
+  .inference-contract-cell span,
+  .inference-contract-cell strong { display: block; }
+  .inference-contract-cell span {
+    color: var(--dim);
+    font-size: 8px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .inference-contract-cell strong {
+    margin-top: 4px;
+    overflow: hidden;
+    color: var(--cyan);
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .model-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .model-channel {
+    position: relative;
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--line-strong);
+    border-radius: 4px;
+    background: rgba(var(--shadow-rgb), .2);
+  }
+
+  .model-channel.running { border-left-color: var(--green); }
+  .model-channel.starting { border-left-color: var(--amber); }
+  .model-channel.unavailable { border-left-color: var(--red); }
+
+  .model-channel-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: start;
+  }
+
+  .model-identity { min-width: 0; }
+
+  .model-name {
+    display: block;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .04em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .model-meta {
+    display: block;
+    margin-top: 3px;
+    color: var(--dim);
+    font-size: 8px;
+    letter-spacing: .04em;
+  }
+
+  .model-path {
+    overflow: hidden;
+    color: var(--dim);
+    direction: rtl;
+    font-size: 8px;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .model-state {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    color: var(--dim);
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .model-state::before {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    content: "";
+    box-shadow: 0 0 7px currentColor;
+  }
+
+  .model-channel.running .model-state { color: var(--green); }
+  .model-channel.starting .model-state { color: var(--amber); }
+  .model-channel.unavailable .model-state { color: var(--red); }
+
+  .model-switch {
+    justify-self: end;
+    min-width: 0;
+  }
+
+  .model-note.error { color: var(--red); }
+
+  .local-agent-handoff {
+    display: grid;
+    grid-template-columns: minmax(210px, .52fr) minmax(0, 1.48fr);
+    border: 1px solid rgba(var(--accent-rgb), .24);
+    border-radius: 4px;
+    background: rgba(var(--surface-strong-rgb), .58);
+    overflow: hidden;
+  }
+
+  .agent-handoff-copy {
+    padding: 18px;
+    border-right: 1px solid var(--line);
+    background:
+      linear-gradient(145deg, rgba(var(--accent-rgb), .075), transparent 62%),
+      rgba(var(--shadow-rgb), .14);
+  }
+
+  .agent-handoff-copy h3,
+  .agent-handoff-copy p { margin: 0; }
+  .agent-handoff-copy h3 {
+    margin-top: 5px;
+    color: var(--text);
+    font-size: 15px;
+    text-transform: uppercase;
+  }
+  .agent-handoff-copy p {
+    margin-top: 9px;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.6;
+  }
+
+  .agent-handoff-steps {
+    display: grid;
+    gap: 7px;
+    margin: 15px 0 0;
+    padding: 0;
+    color: var(--dim);
+    counter-reset: handoff;
+    font-size: 9px;
+    line-height: 1.45;
+    list-style: none;
+  }
+
+  .agent-handoff-steps li {
+    display: grid;
+    grid-template-columns: 19px minmax(0, 1fr);
+    gap: 7px;
+    align-items: start;
+  }
+  .agent-handoff-steps li::before {
+    color: var(--green);
+    content: "0" counter(handoff);
+    counter-increment: handoff;
+    font-weight: 900;
+  }
+
+  .agent-handoff-console {
+    min-width: 0;
+    padding: 14px;
+    background: rgba(var(--shadow-rgb), .3);
+  }
+
+  .agent-handoff-toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .agent-handoff-toolbar span {
+    color: var(--dim);
+    font-size: 8px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .agent-prompt {
+    max-height: 290px;
+    margin: 0;
+    overflow: auto;
+    overflow-wrap: anywhere;
+    padding: 13px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    color: var(--text);
+    background: rgba(var(--shadow-rgb), .4);
+    font: 9px/1.58 var(--mono);
+    white-space: pre-wrap;
+  }
+
+  .model-note {
+    margin: 9px 0 0;
+    color: var(--muted);
+    font-size: 9px;
+    line-height: 1.5;
   }
 
   .power-panel {
@@ -2758,7 +2920,6 @@
     .feed-panel .utility { justify-self: end; }
     .setup-grid { grid-template-columns: 1fr; }
     .setup-module + .setup-module { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; padding-top: 18px; }
-    .onboarding-paths { grid-template-columns: 1fr; }
     .filter-row { grid-template-columns: 1fr; }
     .friction-capture { min-width: 220px; }
     .target-card { grid-template-columns: 1fr; }
@@ -2768,6 +2929,10 @@
     .action-cluster { min-width: 0; justify-content: stretch; }
     .action { flex: 1; min-width: 0; padding-inline: 8px; }
     .target-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .inference-contract,
+    .local-agent-handoff { grid-template-columns: 1fr; }
+    .agent-handoff-copy { border-right: 0; border-bottom: 1px solid var(--line); }
+    .model-list { grid-template-columns: 1fr; }
     .module-row { grid-template-columns: minmax(0, 1fr) minmax(80px, auto); }
     .module-row span:nth-child(n+3):not(.error-line) { display: none; }
     .feed-line { grid-template-columns: 74px minmax(106px, .8fr) minmax(0, 1fr); font-size: 11px; }
@@ -2796,8 +2961,6 @@
     .view-tab { width: 100%; padding-inline: 6px; font-size: 11px; }
     .target-list { padding: 10px 8px 12px; }
     .empty { padding: 32px 8px; }
-    .prompt-head { align-items: stretch; flex-direction: column; }
-    .copy-prompt { width: 100%; }
     .target-card { overflow: hidden; padding: 12px; }
     .target-card { padding: 0; }
     .machine-screen { padding: 12px; }
@@ -2806,6 +2969,13 @@
     .target-type,
     .status-badge { justify-self: start; }
     .target-fields { grid-template-columns: 1fr; }
+    .inference-contract-grid { grid-template-columns: 1fr; }
+    .inference-contract-cell { border-top: 1px solid var(--line); border-left: 0; }
+    .inference-contract-cell:first-child { border-top: 0; }
+    .agent-handoff-toolbar { align-items: stretch; flex-direction: column; }
+    .agent-prompt { max-height: 230px; }
+    .prompt-library-card-head { align-items: stretch; flex-direction: column; }
+    .first-run-scope { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .field-value {
       overflow-wrap: anywhere;
       white-space: normal;
@@ -3066,6 +3236,105 @@
     border-bottom: 0;
   }
 
+  .first-run-dialog { width: min(760px, calc(100vw - 32px)); }
+  .first-run-intro {
+    max-width: 68ch;
+    margin: 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.65;
+  }
+  .first-run-scope {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    margin-top: 16px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--line);
+  }
+  .first-run-scope label {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    padding: 9px 10px;
+    color: var(--dim);
+    background: rgba(var(--surface-strong-rgb), .94);
+    cursor: pointer;
+    transition: color .14s, background .14s;
+  }
+  .first-run-scope label:has(input:checked) {
+    color: var(--cyan);
+    background: rgba(var(--accent-rgb), .055);
+  }
+  .first-run-scope input {
+    width: 13px;
+    height: 13px;
+    margin: 0;
+    accent-color: var(--green);
+  }
+  .first-run-scope span {
+    overflow: hidden;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-align: center;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .first-run-handoff {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 14px;
+    border: 1px solid rgba(var(--accent-rgb), .28);
+    border-left: 3px solid var(--green);
+    border-radius: 4px;
+    background: rgba(var(--accent-rgb), .045);
+  }
+  .first-run-handoff p,
+  .first-run-later { margin: 0; }
+  .first-run-handoff p {
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.6;
+  }
+  .first-run-handoff details { min-width: 0; border-top: 1px solid var(--line); padding-top: 9px; }
+  .first-run-handoff summary {
+    color: var(--cyan);
+    cursor: pointer;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .first-run-handoff pre {
+    max-height: min(34vh, 300px);
+    margin: 10px 0 0;
+    overflow: auto;
+    overflow-wrap: anywhere;
+    color: var(--text);
+    font: 9px/1.58 var(--mono);
+    white-space: pre-wrap;
+  }
+  .first-run-later {
+    margin-top: 14px;
+    padding-left: 11px;
+    border-left: 2px solid var(--cyan);
+    color: var(--dim);
+    font-size: 9px;
+    line-height: 1.6;
+  }
+  .first-run-copy {
+    border-color: rgba(var(--accent-rgb), .48);
+    color: var(--green);
+    background: rgba(var(--accent-rgb), .07);
+  }
+
   .additional-project-setup,
   .agent-assisted-setup {
     display: grid;
@@ -3234,6 +3503,56 @@
   .dialog-actions [hidden] { display: none; }
 
   .update-dialog { width: min(580px, calc(100vw - 32px)); }
+  .prompt-library-dialog { width: min(780px, calc(100vw - 32px)); }
+  .prompt-library-intro {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.6;
+  }
+  .prompt-library-list { display: grid; gap: 10px; }
+  .prompt-library-card {
+    display: grid;
+    gap: 10px;
+    padding: 13px;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--cyan);
+    border-radius: 4px;
+    background: rgba(var(--shadow-rgb), .2);
+  }
+  .prompt-library-card-head {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .prompt-library-card-title { min-width: 0; }
+  .prompt-library-card-title strong,
+  .prompt-library-card-title span { display: block; }
+  .prompt-library-card-title strong {
+    color: var(--text);
+    font-size: 11px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+  .prompt-library-card-title span {
+    margin-top: 3px;
+    color: var(--dim);
+    font-size: 8px;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+  }
+  .prompt-library-card details { min-width: 0; border-top: 1px solid var(--line); padding-top: 8px; }
+  .prompt-library-card summary { color: var(--cyan); cursor: pointer; font-size: 9px; text-transform: uppercase; }
+  .prompt-library-card pre {
+    max-height: 220px;
+    margin: 9px 0 0;
+    overflow: auto;
+    overflow-wrap: anywhere;
+    color: var(--text);
+    font: 9px/1.58 var(--mono);
+    white-space: pre-wrap;
+  }
   .update-section-label {
     color: var(--dim);
     font-size: 8px;
@@ -3363,8 +3682,8 @@
             <span class="settings-sync" id="settingsSync" role="status" aria-live="polite"></span>
             <label class="settings-switch" id="skillsPanelField" for="skillsPanelEnabled">
               <span>
-                <strong>Skills panel</strong>
-                <small>Opt in to scan local agent workflow files. Disabled by default for privacy.</small>
+                <strong>AI Workflow</strong>
+                <small>Show Skills, Instructions, and Agent Ops. Enabled by default; all scans stay local.</small>
               </span>
               <input id="skillsPanelEnabled" type="checkbox" role="switch" aria-describedby="panelSettingsStatus">
             </label>
@@ -3376,6 +3695,10 @@
               <input id="scriptsPanelEnabled" type="checkbox" role="switch" aria-describedby="panelSettingsStatus">
             </label>
             <span class="settings-status" id="panelSettingsStatus" role="status" aria-live="polite"></span>
+            <button class="settings-link" id="promptLibraryTrigger" type="button">
+              <strong>Agent prompts</strong>
+              <small>Review and copy every machine-aware setup prompt.</small>
+            </button>
             <label class="settings-switch" id="launchOnStartupField" for="launchOnStartup" hidden>
               <span>
                 <strong>Launch on startup</strong>
@@ -3415,6 +3738,7 @@
           <div class="view-tabs" role="tablist" aria-label="Console view">
             <button class="view-tab active" data-view="projects" role="tab" aria-selected="true">Targets</button>
             <button class="view-tab" data-view="processes" role="tab" aria-selected="false">Port Signals</button>
+            <button class="view-tab" id="localInferenceTab" data-view="localInference" role="tab" aria-selected="false">Local Models</button>
             <button class="view-tab" id="scriptsTab" data-view="scripts" role="tab" aria-selected="false" hidden>Scripts</button>
             <button class="view-tab" id="skillsTab" data-view="skills" role="tab" aria-selected="false" hidden>Skills</button>
             <button class="view-tab" id="instructionsTab" data-view="instructions" role="tab" aria-selected="false" hidden>Instructions</button>
@@ -3617,6 +3941,39 @@
     </div>
   </form>
 </dialog>
+<dialog class="lair-dialog first-run-dialog" id="firstRunSetupDialog" aria-labelledby="firstRunSetupTitle">
+  <form method="dialog">
+    <div class="dialog-head">
+      <div>
+        <div class="section-kicker">First launch · all-in-one handoff</div>
+        <h2 id="firstRunSetupTitle">Commission Your Lair</h2>
+      </div>
+      <button class="utility" value="cancel" type="submit" aria-label="Close first-run setup">Set Up Later</button>
+    </div>
+    <div class="dialog-body">
+      <p class="first-run-intro">Copy one machine-aware prompt to your coding agent. It audits this PC, configures every supported Hacker's Lair area in a safe order, preserves anything it finds, and verifies the finished setup.</p>
+      <div class="first-run-scope" aria-label="Setup coverage">
+        <label><input type="checkbox" data-first-run-section="targets" checked><span>Targets</span></label>
+        <label><input type="checkbox" data-first-run-section="skills" checked><span>Skills</span></label>
+        <label><input type="checkbox" data-first-run-section="automation" checked><span>Automation</span></label>
+        <label><input type="checkbox" data-first-run-section="local-models" checked><span>Local Models</span></label>
+      </div>
+      <section class="first-run-handoff">
+        <div class="section-kicker">One complete prompt</div>
+        <p>Review the handoff, then paste it into the agent you trust to configure this machine.</p>
+        <details>
+          <summary>Review full setup prompt</summary>
+          <pre id="firstRunSetupPrompt">Building the machine-aware setup handoff...</pre>
+        </details>
+      </section>
+      <p class="first-run-later">Adding more later? Open Settings → Agent Prompts for focused, machine-aware handoffs that extend a specific area without rerunning the full setup.</p>
+    </div>
+    <div class="dialog-actions">
+      <button class="utility" value="cancel" type="submit">Set Up Later</button>
+      <button class="utility first-run-copy" id="copyFirstRunSetupPrompt" type="button">Copy Full Setup Prompt</button>
+    </div>
+  </form>
+</dialog>
 <dialog class="lair-dialog" id="setupWizard" aria-labelledby="setupWizardTitle">
   <form method="dialog">
     <div class="dialog-head">
@@ -3778,6 +4135,26 @@
     </div>
   </form>
 </dialog>
+<dialog class="lair-dialog prompt-library-dialog" id="promptLibraryDialog" aria-labelledby="promptLibraryTitle">
+  <form method="dialog">
+    <div class="dialog-head">
+      <div>
+        <div class="section-kicker">Agent handoff registry</div>
+        <h2 id="promptLibraryTitle">Agent Prompts</h2>
+      </div>
+      <button class="utility" value="cancel" type="submit" aria-label="Close agent prompts">Close</button>
+    </div>
+    <div class="dialog-body">
+      <p class="prompt-library-intro">Machine-aware prompts generated from the current Lair configuration. Review one before handing it to an agent.</p>
+      <div class="prompt-library-list" id="promptLibraryList" aria-live="polite">
+        <p class="setup-copy">Loading available prompts...</p>
+      </div>
+    </div>
+    <div class="dialog-actions">
+      <button class="utility" value="cancel" type="submit">Close</button>
+    </div>
+  </form>
+</dialog>
 <div class="command-palette" id="commandPalette" role="dialog" aria-modal="true" aria-labelledby="commandTitle" hidden>
   <div class="command-core">
     <div class="command-head">
@@ -3830,10 +4207,9 @@
     fontScale: [90, 100, 110],
   });
   const RAIN_COLUMN_WIDTH = 30;
-  const RAIN_FRAME_INTERVAL = 74;
   const RAIN_TRAIL_LENGTH = 5;
-  const RAIN_SPEED = .2;
   const RAIN_GLYPHS = '01<>[]{}#/\\$+-=:;';
+  const VISUAL_PREFERENCES_EVENT = 'lair:visual-preferences-applied';
   const POWER_CONFIRM_WINDOW_MS = 5000;
   const USAGE_RETENTION_DAYS = 45;
   const BOOT_SEEN_KEY = 'hackersLair.cinematicSeen';
@@ -3842,6 +4218,7 @@
   const VIEW_CONFIG = {
     projects: { title: 'Targets', placeholder: 'filter targets by name, branch, module, path, pid, or port', empty: 'No matching targets detected.' },
     processes: { title: 'Port Signals', placeholder: 'filter signals by name, path, pid, or port', empty: 'No matching port signals detected.' },
+    localInference: { title: 'Local Models', placeholder: 'filter local models by name, quant, or source', empty: 'No matching local models detected.' },
     scripts: { title: 'Scripts', placeholder: 'filter scripts by name, file, or description', empty: 'No matching scripts detected.' },
     skills: { title: 'Skills', placeholder: 'filter skills by name, source, or description', empty: 'No matching skills detected.' },
     instructions: { title: 'Instructions', placeholder: 'filter AGENTS.md and CLAUDE.md by path', empty: 'No workspace instruction files detected.' },
@@ -3884,10 +4261,15 @@
       parity: { counts: {}, exclusive: [], matrix: [] },
     },
     onboarding: null,
+    firstRunPromptShown: false,
     settings: null,
     panelSettings: { busy: false, error: '', saved: false },
     update: null,
     backend: null,
+    localModels: { supported: false, port: 8080, activeModelId: null, conflict: null, models: [] },
+    localInferencePrompt: '',
+    localInferencePromptError: '',
+    modelBusy: new Map(),
     launchAtLogin: { supported: false, enabled: false, busy: false, error: '' },
     discovery: null,
     uiPreferences: normalizeUiPreferences(loadJson(UI_PREFERENCES_KEY, {})),
@@ -3931,49 +4313,25 @@
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (!canvas || !context) return;
 
-    let columns = [];
-    let animationFrame = 0;
-    let lastFrame = 0;
     let cssWidth = 1;
     let cssHeight = 1;
 
-    function resizeRain() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      cssWidth = Math.max(window.innerWidth, 1);
-      cssHeight = Math.max(window.innerHeight, 1);
-      canvas.width = Math.round(cssWidth * dpr);
-      canvas.height = Math.round(cssHeight * dpr);
-      canvas.style.width = `${cssWidth}px`;
-      canvas.style.height = `${cssHeight}px`;
-      // Draw in CSS pixels; the backing store is scaled up for crisp glyphs on HiDPI.
-      context.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const columnCount = Math.ceil(cssWidth / RAIN_COLUMN_WIDTH);
-      const rowCount = Math.ceil(cssHeight / RAIN_COLUMN_WIDTH);
-      columns = Array.from({ length: columnCount }, (_, index) => (
-        columns[index] ?? -Math.floor(Math.random() * rowCount)
-      ));
-      context.font = `600 14px ${getComputedStyle(document.documentElement).getPropertyValue('--mono')}`;
-      context.textAlign = 'center';
-      context.textBaseline = 'middle';
-    }
-
-    function drawRain(timestamp) {
-      animationFrame = requestAnimationFrame(drawRain);
-      if (timestamp - lastFrame < RAIN_FRAME_INTERVAL) return;
-      lastFrame = timestamp;
+    function renderRain() {
       context.clearRect(0, 0, cssWidth, cssHeight);
-      if (document.documentElement.dataset.motion === 'reduced') return;
+      if (reducedMotion.matches || document.documentElement.dataset.motion === 'reduced') return;
 
       const rowCount = Math.ceil(cssHeight / RAIN_COLUMN_WIDTH);
+      const columnCount = Math.ceil(cssWidth / RAIN_COLUMN_WIDTH);
       const halfColumn = RAIN_COLUMN_WIDTH / 2;
       const theme = getComputedStyle(document.documentElement);
       const leadColor = theme.getPropertyValue('--cyan').trim();
       const trailColor = theme.getPropertyValue('--green').trim();
-      columns.forEach((drop, column) => {
+      Array.from({ length: columnCount }, (_, column) => {
+        const drop = Math.floor(Math.random() * (rowCount + RAIN_TRAIL_LENGTH));
         const x = (column * RAIN_COLUMN_WIDTH) + halfColumn;
         for (let trail = 0; trail < RAIN_TRAIL_LENGTH; trail += 1) {
           const row = drop - trail;
-          if (row < 0) continue;
+          if (row < 0 || row > rowCount) continue;
           const alpha = (RAIN_TRAIL_LENGTH - trail) / RAIN_TRAIL_LENGTH;
           if (trail === 0) {
             context.fillStyle = leadColor;
@@ -3990,35 +4348,29 @@
         }
         context.globalAlpha = 1;
         context.shadowBlur = 0;
-
-        columns[column] += RAIN_SPEED + ((column % 4) * .02);
-        if (columns[column] - RAIN_TRAIL_LENGTH > rowCount && Math.random() > .86) {
-          columns[column] = -Math.floor(Math.random() * 14);
-        }
       });
     }
 
-    function stopRain() {
-      cancelAnimationFrame(animationFrame);
-      animationFrame = 0;
-      context.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    function syncRain() {
-      const shouldRun = !reducedMotion.matches && !document.hidden;
-      if (shouldRun && !animationFrame) {
-        lastFrame = 0;
-        animationFrame = requestAnimationFrame(drawRain);
-      } else if (!shouldRun && animationFrame) {
-        stopRain();
-      }
+    function resizeRain() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cssWidth = Math.max(window.innerWidth, 1);
+      cssHeight = Math.max(window.innerHeight, 1);
+      canvas.width = Math.round(cssWidth * dpr);
+      canvas.height = Math.round(cssHeight * dpr);
+      canvas.style.width = `${cssWidth}px`;
+      canvas.style.height = `${cssHeight}px`;
+      // Draw in CSS pixels; the backing store is scaled up for crisp glyphs on HiDPI.
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      context.font = `600 14px ${getComputedStyle(document.documentElement).getPropertyValue('--mono')}`;
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      renderRain();
     }
 
     resizeRain();
     window.addEventListener('resize', resizeRain);
-    document.addEventListener('visibilitychange', syncRain);
-    reducedMotion.addEventListener('change', syncRain);
-    syncRain();
+    window.addEventListener(VISUAL_PREFERENCES_EVENT, renderRain);
+    reducedMotion.addEventListener('change', renderRain);
   }
 
   function installCinematicMode() {
@@ -4175,6 +4527,7 @@
     const osReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     root.dataset.motion = osReducedMotion ? 'reduced' : normalized.motion;
     root.style.setProperty('--font-scale', `${normalized.fontScale}%`);
+    window.dispatchEvent(new Event(VISUAL_PREFERENCES_EVENT));
     $('themePreference').value = normalized.theme;
     $('densityPreference').value = normalized.density;
     $('motionPreference').value = normalized.motion;
@@ -4424,6 +4777,324 @@
 
   function statusBadge(status) {
     return `<span class="status-badge status-${status.key}">${status.label}</span>`;
+  }
+
+  function localModelState(model) {
+    const pendingAction = state.modelBusy.get(model.id);
+    if (pendingAction === 'start') return { key: 'starting', label: 'QUEUED' };
+    if (pendingAction === 'stop') return { key: 'starting', label: 'STOPPING' };
+    if (model.state === 'running') return { key: 'running', label: 'ONLINE' };
+    if (model.state === 'starting') return { key: 'starting', label: 'LOADING' };
+    if (model.state === 'unavailable') return { key: 'unavailable', label: 'MISSING' };
+    return { key: 'stopped', label: 'OFFLINE' };
+  }
+
+  function localInferenceHtml() {
+    const snapshot = state.localModels;
+    const visibleModels = (snapshot.models || []).filter((model) => {
+      if (!state.query) return true;
+      return [model.name, model.quant, model.source, model.modelFile]
+        .join(' ')
+        .toLowerCase()
+        .includes(state.query);
+    });
+    const modelsHtml = visibleModels.length
+      ? visibleModels.map((model) => {
+        const displayState = localModelState(model);
+        const active = ['running', 'starting'].includes(model.state);
+        const blockedByOther = Boolean(snapshot.activeModelId && snapshot.activeModelId !== model.id);
+        const busy = state.modelBusy.has(model.id);
+        const startDisabled = busy || !model.available || active || blockedByOther || Boolean(snapshot.conflict);
+        const stopDisabled = busy || !active;
+        const missing = model.missing?.length ? `Missing ${model.missing.join(', ')}` : '';
+        return `
+          <section class="model-channel ${displayState.key}" data-local-model="${esc(model.id)}">
+            <div class="model-channel-head">
+              <div class="model-identity">
+                <strong class="model-name" title="${esc(model.name)}">${esc(model.name)}</strong>
+                <span class="model-meta">${esc(model.quant)} · ${esc(model.generationTokensPerSecond)} gen tok/s · ${esc(model.source)}</span>
+              </div>
+              <span class="model-state">${esc(displayState.label)}</span>
+            </div>
+            <span class="model-path" title="${esc(model.files?.model || '')}">${esc(model.files?.model || '')}</span>
+            <div class="model-switch action-cluster compact" aria-label="${esc(model.name)} power controls">
+              ${active
+                ? `<button class="action terminate" type="button" data-model-action="stop" data-model-id="${esc(model.id)}" title="${esc(`Stop ${model.name}`)}" ${stopDisabled ? 'disabled' : ''}>Off</button>`
+                : `<button class="action initiate" type="button" data-model-action="start" data-model-id="${esc(model.id)}" title="${esc(startDisabled && blockedByOther ? 'Stop the active model first.' : missing || `Start ${model.name}`)}" ${startDisabled ? 'disabled' : ''}>On</button>`}
+            </div>
+          </section>
+        `;
+      }).join('')
+      : '<div class="model-channel unavailable"><span class="model-meta">No matching local model channels.</span></div>';
+    const note = snapshot.error
+      || (!snapshot.supported ? 'Native Windows llama.cpp controls only.' : '')
+      || snapshot.conflict?.message
+      || (snapshot.activeModelId
+        ? `Port ${snapshot.port} is assigned to ${snapshot.activeModelId}.`
+        : `One model can be online at a time · localhost:${snapshot.port}.`);
+    const prompt = state.localInferencePrompt
+      || (state.localInferencePromptError
+        ? `Setup prompt unavailable: ${state.localInferencePromptError}`
+        : 'Building a machine-aware setup prompt from the live artifact audit...');
+    const onlineCount = (snapshot.models || []).filter((model) => model.state === 'running').length;
+    const availableCount = (snapshot.models || []).filter((model) => model.available).length;
+    const setupComplete = snapshot.supported
+      && snapshot.models?.length > 0
+      && snapshot.models.every((model) => model.available);
+    const setupPanel = setupComplete
+      ? ''
+      : `
+        <section class="local-agent-handoff" aria-label="Agent-assisted Local Models setup">
+          <div class="agent-handoff-copy">
+            <div class="section-kicker">Agent handoff</div>
+            <h3>Set up this machine with your agent</h3>
+            <p>Copy the live prompt into Codex, Claude Code, OpenCode, or your preferred coding agent. It carries the exact paths, models, quant levels, Vulkan checks, and stop conditions for this machine.</p>
+            <ol class="agent-handoff-steps">
+              <li>Copy the reviewed prompt.</li>
+              <li>Paste it into an agent running on this PC.</li>
+              <li>Return here when both channels report ready.</li>
+            </ol>
+          </div>
+          <div class="agent-handoff-console">
+            <div class="agent-handoff-toolbar">
+              <span>machine-aware setup prompt</span>
+              <button class="utility" type="button" data-copy-local-prompt ${state.localInferencePrompt ? '' : 'disabled'}>Copy agent prompt</button>
+            </div>
+            <pre class="agent-prompt">${esc(prompt)}</pre>
+          </div>
+        </section>
+      `;
+    return `
+      <div class="local-inference-deck" aria-live="polite">
+        <section class="inference-contract">
+          <div>
+            <div class="section-kicker">Runtime contract</div>
+            <h3>One endpoint. One live model.</h3>
+            <p>Power a reviewed llama.cpp channel for OpenCode, Aider, or any OpenAI-compatible client. The interlock prevents both models from competing for VRAM.</p>
+          </div>
+          <div class="inference-contract-grid">
+            <div class="inference-contract-cell"><span>Root</span><strong title="${esc(snapshot.rootDirectory || '')}">${esc(snapshot.rootDirectory || 'Scanning...')}</strong></div>
+            <div class="inference-contract-cell"><span>Endpoint</span><strong>localhost:${esc(snapshot.port)}</strong></div>
+            <div class="inference-contract-cell"><span>Channels</span><strong>${onlineCount} live / ${availableCount} ready</strong></div>
+          </div>
+        </section>
+        <div class="model-list">${modelsHtml}</div>
+        <p class="model-note ${snapshot.error || snapshot.conflict ? 'error' : ''}">${esc(note)}</p>
+        ${setupPanel}
+      </div>
+    `;
+  }
+
+  function renderLocalModels() {
+    if (state.view === 'localInference') renderTargets();
+    updateIntel();
+  }
+
+  async function loadLocalModels(quiet = false) {
+    try {
+      state.localModels = await fetchJson('/api/local-models');
+      if (!quiet) pushFeed('MODEL_REGISTRY_SYNCED', `count=${state.localModels.models?.length || 0}`, 'info');
+    } catch (error) {
+      state.localModels = { ...state.localModels, error: `Model controls unavailable: ${error.message}` };
+      if (!quiet) pushFeed('MODEL_REGISTRY_FAILED', `reason=${error.message}`, 'error');
+    }
+    renderLocalModels();
+  }
+
+  async function loadLocalInferencePrompt(quiet = false) {
+    try {
+      const data = await fetchJson('/api/local-models/setup-prompt');
+      state.localInferencePrompt = data.prompt || '';
+      state.localInferencePromptError = '';
+      if (!quiet) pushFeed('MODEL_SETUP_PROMPT_READY', 'scope=local_inference', 'info');
+    } catch (error) {
+      state.localInferencePrompt = '';
+      state.localInferencePromptError = error.message;
+      if (!quiet) pushFeed('MODEL_SETUP_PROMPT_FAILED', `reason=${error.message}`, 'error');
+    }
+    renderLocalModels();
+  }
+
+  function promptLibraryEntries() {
+    const entries = [];
+    const seen = new Set();
+    const add = (id, title, scope, prompt) => {
+      const normalized = String(prompt || '').trim();
+      if (!normalized || seen.has(normalized)) return;
+      seen.add(normalized);
+      entries.push({ id, title, scope, prompt: normalized });
+    };
+
+    add('local-models', 'Local Models setup', 'Models · native Windows', state.localInferencePrompt);
+    (state.onboarding?.prompts || []).forEach((entry) => {
+      add(`onboarding-${entry.id}`, entry.title, 'First-run setup', entry.prompt);
+    });
+    add('projects-additional', 'Add more targets', 'Target registry', state.onboarding?.additionalProjectsPrompt);
+    add('skills-additional', 'Create a personal skill', 'AI Workflow', state.onboarding?.additionalSkillPrompt);
+    add('scripts-additional', 'Add an AutoIt script', 'Local automation', state.onboarding?.additionalScriptPrompt);
+    add('usage-tracking', 'Configure usage tracking', 'AI Workflow', state.aiSetup?.prompt);
+    return entries;
+  }
+
+  function renderPromptLibrary() {
+    const entries = promptLibraryEntries();
+    $('promptLibraryList').innerHTML = entries.length
+      ? entries.map((entry) => `
+        <article class="prompt-library-card" data-prompt-library-id="${esc(entry.id)}">
+          <div class="prompt-library-card-head">
+            <div class="prompt-library-card-title">
+              <strong>${esc(entry.title)}</strong>
+              <span>${esc(entry.scope)}</span>
+            </div>
+            <button class="utility" type="button" data-copy-library-prompt="${esc(entry.id)}">Copy prompt</button>
+          </div>
+          <details>
+            <summary>Review prompt</summary>
+            <pre>${esc(entry.prompt)}</pre>
+          </details>
+        </article>
+      `).join('')
+      : '<p class="setup-copy">No setup prompts are available for the current configuration.</p>';
+  }
+
+  async function openPromptLibrary() {
+    setSettingsOpen(false);
+    $('promptLibraryList').innerHTML = '<p class="setup-copy">Loading available prompts...</p>';
+    $('promptLibraryDialog').showModal();
+    await Promise.allSettled([
+      loadLocalInferencePrompt(true),
+      loadOnboarding(),
+      loadAiSetup(true),
+    ]);
+    renderPromptLibrary();
+  }
+
+  async function copyPromptLibraryEntry(id, button) {
+    const entry = promptLibraryEntries().find((candidate) => candidate.id === id);
+    if (!entry) return;
+    button.disabled = true;
+    try {
+      await navigator.clipboard.writeText(entry.prompt);
+      button.textContent = 'Copied';
+      pushFeed('PROMPT_LIBRARY_COPIED', `scope=${slug(entry.id)}`, 'info');
+      setTimeout(() => {
+        if (!button.isConnected) return;
+        button.textContent = 'Copy prompt';
+        button.disabled = false;
+      }, 1600);
+    } catch {
+      button.disabled = false;
+      toast('Clipboard unavailable. Open the prompt and select it manually.', true);
+    }
+  }
+
+  function firstRunSectionSelection() {
+    return new Set([...document.querySelectorAll('[data-first-run-section]:checked')]
+      .map((input) => input.dataset.firstRunSection));
+  }
+
+  function selectedFirstRunSections() {
+    const selected = firstRunSectionSelection();
+    const sections = (state.onboarding?.firstRunSections || [])
+      .filter((section) => selected.has(section.id) && section.prompt)
+      .map((section) => ({
+        id: section.id,
+        title: section.title,
+        prompt: section.prompt.trim(),
+      }));
+    if (selected.has('local-models') && state.localInferencePrompt) {
+      sections.push({
+        id: 'local-models',
+        title: 'Local Models',
+        prompt: state.localInferencePrompt.trim(),
+      });
+    }
+    return sections;
+  }
+
+  function firstRunSetupPrompt() {
+    const sections = selectedFirstRunSections();
+    if (!sections.length) return '';
+    const sequence = sections.map((section, index) => [
+      `${index + 1}. ${section.title.toUpperCase()}`,
+      '',
+      section.prompt,
+    ].join('\n')).join('\n\n');
+    return [
+      "Set up the selected Hacker's Lair areas for this machine.",
+      `Selected areas: ${sections.map((section) => section.title).join(', ')}.`,
+      '',
+      'Use one coordinated pass. Inspect the machine and every referenced file read-only before changing anything. Preserve valid existing configuration and back up each file before editing it. A selected area may be completely absent; in that case, create its setup safely instead of skipping it. Ask before installing software, downloading large model files, choosing a machine-wide folder, or resolving an ambiguous path, command, port, hook, or automation behavior.',
+      '',
+      sequence,
+      '',
+      "When every selected area is complete, reopen Hacker's Lair and verify each enabled tab against the real files and processes on this machine. Report what changed, what was already present, what remains optional, and every verification result.",
+    ].join('\n');
+  }
+
+  function renderFirstRunSetupPrompt() {
+    const prompt = firstRunSetupPrompt();
+    $('firstRunSetupPrompt').textContent = prompt
+      || 'Select at least one setup area to build the agent handoff.';
+    $('copyFirstRunSetupPrompt').disabled = !prompt;
+  }
+
+  function shouldShowFirstRunSetup() {
+    const hasReadyModel = (state.localModels.models || []).some((model) => model.available);
+    return !state.firstRunPromptShown
+      && state.onboarding?.hasAnySetup === false
+      && !state.scriptsConfigured
+      && !hasReadyModel
+      && Boolean(firstRunSetupPrompt());
+  }
+
+  function maybeOpenFirstRunSetup() {
+    if (!shouldShowFirstRunSetup()) return;
+    state.firstRunPromptShown = true;
+    renderFirstRunSetupPrompt();
+    $('firstRunSetupDialog').showModal();
+    pushFeed('FIRST_RUN_HANDOFF_OPENED', 'scope=complete_setup', 'info');
+  }
+
+  async function copyFirstRunSetupPrompt() {
+    const button = $('copyFirstRunSetupPrompt');
+    const prompt = firstRunSetupPrompt();
+    if (!prompt || button.disabled) return;
+    button.disabled = true;
+    try {
+      await navigator.clipboard.writeText(prompt);
+      button.textContent = 'Copied · Paste Into Your Agent';
+      pushFeed('FIRST_RUN_HANDOFF_COPIED', 'scope=complete_setup', 'info');
+      setTimeout(() => {
+        if (!button.isConnected) return;
+        button.textContent = 'Copy Full Setup Prompt';
+        button.disabled = false;
+      }, 1800);
+    } catch {
+      button.disabled = false;
+      toast('Clipboard unavailable. Open the prompt and select it manually.', true);
+    }
+  }
+
+  async function setLocalModelPower(id, action) {
+    if (state.modelBusy.has(id)) return;
+    const model = state.localModels.models?.find((candidate) => candidate.id === id);
+    if (!model || !['start', 'stop'].includes(action)) return;
+    state.modelBusy.set(id, action);
+    renderLocalModels();
+    pushFeed(`MODEL_${action.toUpperCase()}_REQUEST`, `model=${slug(id)} port=${state.localModels.port}`, 'info');
+    try {
+      await postJson(`/api/local-models/${action}`, { id });
+      toast(action === 'start' ? `${model.name} is loading.` : `${model.name} is stopping.`);
+      await sleep(350);
+      await loadLocalModels(true);
+    } catch (error) {
+      pushFeed(`MODEL_${action.toUpperCase()}_FAILED`, `model=${slug(id)} reason=${error.message}`, 'error');
+      toast(error.message, true);
+    } finally {
+      state.modelBusy.delete(id);
+      renderLocalModels();
+    }
   }
 
   function field(label, value, className = '') {
@@ -5303,17 +5974,6 @@
     `;
   }
 
-  function onboardingPromptsForView() {
-    if (state.query || !state.onboarding?.prompts?.length) return [];
-    if (state.view === 'projects' && state.projects.length === 0) {
-      return state.onboarding.prompts.filter((prompt) => ['complete', 'projects'].includes(prompt.id));
-    }
-    if (state.view === 'skills' && state.skillsLoaded && !state.skills.some((skill) => skill.kind === 'personal')) {
-      return state.onboarding.prompts.filter((prompt) => ['skills', 'usage'].includes(prompt.id));
-    }
-    return [];
-  }
-
   function aiWorkflowSetupHtml() {
     const setup = state.aiSetup;
     if (!setup) return '';
@@ -5350,49 +6010,33 @@
     `;
   }
 
-  function onboardingHtml(prompts) {
-    const projectSetup = state.view === 'projects';
-    const agentPath = `
-      <section class="onboarding-path agent">
-        <div class="section-kicker setup-path-kicker">
-          <span>Agent-assisted</span>
-          ${projectSetup ? '<span class="setup-recommendation" title="Fastest if you already use a coding agent">Recommended</span>' : ''}
-        </div>
-        <h3>Copy prompt for your AI agent</h3>
-        <p>Use the generated machine-aware prompt with any coding agent. It includes live config and schema locations, safety rules, and verification commands.</p>
-        ${prompts.map((prompt) => `
-          <section class="prompt-card">
-            <div class="prompt-head">
-              <strong>${esc(prompt.title)}</strong>
-              <button class="copy-prompt" type="button" data-copy-prompt="${esc(prompt.id)}">Copy prompt</button>
-            </div>
-            <pre>${esc(prompt.prompt)}</pre>
-          </section>
-        `).join('')}
-      </section>
-    `;
+  function targetRecoveryEmptyHtml() {
+    const prompt = state.onboarding?.targetRecoveryPrompt || '';
     return `
-      <div class="onboarding">
-        <div class="onboarding-intro">
-          <strong>${projectSetup ? 'Choose your setup path' : 'Configuration needed'}</strong>
-          <span>${projectSetup ? 'Hand the setup to your preferred coding agent, or configure it yourself with the guided wizard. Both paths preserve existing configuration.' : 'Copy a machine-aware prompt to configure this optional local feature safely.'}</span>
+      <section class="agent-assisted-card" role="region" aria-label="Target registry recovery">
+        <div class="section-kicker">Target registry · recovery available</div>
+        <h3>No targets loaded</h3>
+        <p>Your project folders may still be intact. Have your agent check for a prior Hacker's Lair registry before scanning folders or creating replacement entries.</p>
+        <div class="config-controls">
+          <button class="utility" type="button" data-copy-target-recovery ${prompt ? '' : 'disabled'}>Copy recovery prompt</button>
+          <button class="utility" type="button" data-add-target-manually>Add manually</button>
         </div>
-        <div class="onboarding-paths">
-          ${agentPath}
-          ${projectSetup ? `
-          <section class="onboarding-path wizard">
-            <div class="section-kicker">Guided setup</div>
-            <h3>Set up with wizard</h3>
-            <p>Choose a workspace folder, review detected projects, and import only the targets you approve.</p>
-            <button class="utility" type="button" data-onboarding-wizard>Open setup wizard</button>
-          </section>
-          ` : ''}
-        </div>
-      </div>
+        <details>
+          <summary>Review recovery prompt</summary>
+          <pre>${esc(prompt || 'Recovery prompt unavailable. Refresh the registry and try again.')}</pre>
+        </details>
+      </section>
     `;
   }
 
   function renderTargets() {
+    if (state.view === 'localInference') {
+      $('emptyState').hidden = true;
+      $('viewSubnav').hidden = true;
+      $('viewSubnav').innerHTML = '';
+      $('targetList').innerHTML = localInferenceHtml();
+      return;
+    }
     const rows = state.view === 'projects' ? visibleProjects()
       : state.view === 'processes' ? visibleProcesses()
       : state.view === 'scripts' ? visibleScripts()
@@ -5400,16 +6044,19 @@
       : state.view === 'instructions' ? visibleInstructions()
       : visibleAgentOps();
     const scanningSkills = state.view === 'skills' && !state.skillsLoaded;
-    const onboardingPrompts = onboardingPromptsForView();
     const hasSupplementalContent = ['instructions', 'agentOps'].includes(state.view);
-    $('emptyState').hidden = rows.length > 0 || hasSupplementalContent;
-    if (onboardingPrompts.length) $('emptyState').innerHTML = onboardingHtml(onboardingPrompts);
-    else $('emptyState').textContent = scanningSkills
-      ? 'Scanning shared agent skill folder...'
-      : VIEW_CONFIG[state.view].empty;
-    const skillsSetup = state.view === 'skills' && (!onboardingPrompts.length || rows.length)
-      ? aiWorkflowSetupHtml()
-      : '';
+    const targetRegistryEmpty = state.view === 'projects' && state.projects.length === 0;
+    const emptyState = $('emptyState');
+    emptyState.hidden = rows.length > 0 || hasSupplementalContent;
+    emptyState.classList.toggle('target-recovery-empty', targetRegistryEmpty);
+    if (targetRegistryEmpty) {
+      emptyState.innerHTML = targetRecoveryEmptyHtml();
+    } else {
+      emptyState.textContent = scanningSkills
+        ? 'Scanning shared agent skill folder...'
+        : VIEW_CONFIG[state.view].empty;
+    }
+    const skillsSetup = state.view === 'skills' ? aiWorkflowSetupHtml() : '';
     const skillRouter = state.view === 'skills' && state.skillsLoaded ? skillRouterHtml() : '';
     const archived = state.view === 'skills' && !state.showDefaultSkills
       ? archivedSkillsHtml()
@@ -5454,6 +6101,7 @@
     updateIntel();
     if (view === 'projects') loadProjects(true);
     else if (view === 'processes') Promise.all([loadProjects(true), loadProcesses(true)]);
+    else if (view === 'localInference') Promise.all([loadLocalModels(true), loadLocalInferencePrompt(true)]);
     else if (view === 'scripts') loadScripts(true);
     else if (view === 'skills') loadSkills(true);
     else if (view === 'instructions') loadInstructions(true);
@@ -5477,6 +6125,9 @@
     if (state.view === 'projects') {
       rows = state.projects;
       live = rows.filter((row) => row.running).length;
+    } else if (state.view === 'localInference') {
+      rows = state.localModels.models || [];
+      live = rows.filter((row) => ['running', 'starting'].includes(row.state)).length;
     } else if (state.view === 'scripts') {
       rows = state.scripts;
       live = rows.filter((row) => row.running).length;
@@ -5494,17 +6145,19 @@
       live = rows.filter((row) => !row.stopped).length;
     }
     const dormant = Math.max(rows.length - live, 0);
-    const anyBusy = state.busy.size > 0;
+    const anyBusy = state.busy.size > 0 || state.modelBusy.size > 0;
     const anyError = state.projects.some((project) => project.errored);
     const memoryUsed = state.system?.memory?.usedPercent;
     const cpu = state.system?.cpuPercent;
 
-    $('liveLabel').textContent = state.view === 'skills'
-      ? 'Personal Skills'
+    $('liveLabel').textContent = state.view === 'localInference'
+      ? 'Models Online'
+      : state.view === 'skills' ? 'Personal Skills'
       : state.view === 'instructions' ? 'Instruction Files'
       : state.view === 'agentOps' ? 'Inventory Records' : 'Live Targets';
-    $('dormantLabel').textContent = state.view === 'skills'
-      ? 'Default Skills'
+    $('dormantLabel').textContent = state.view === 'localInference'
+      ? 'Models Offline'
+      : state.view === 'skills' ? 'Default Skills'
       : state.view === 'instructions' ? 'Drift Findings'
       : state.view === 'agentOps' ? 'Health Findings' : 'Dormant Targets';
     if (state.view === 'instructions') {
@@ -7133,6 +7786,8 @@
       { verb: 'COPY', label: 'Copy redacted Doctor report', hint: 'support', run: copyDoctorReport },
       { verb: 'ADD', label: 'Add project', hint: 'schema-backed editor', run: () => openProjectEditor() },
       { verb: 'SCAN', label: 'Scan folder', hint: 'project discovery', run: openSetupWizard },
+      { verb: 'LOCAL AI', label: 'Open Local Models', hint: 'models and agent setup', run: () => setView('localInference') },
+      { verb: 'PROMPTS', label: 'Open Agent Prompts', hint: 'Settings library', run: openPromptLibrary },
       { verb: 'RELEASE', label: 'Open release notes', hint: 'GitHub Releases', run: openReleaseNotes },
       { verb: 'CONFIG', label: 'Export redacted config', hint: 'backup', run: exportRedactedConfig },
       { verb: 'CONFIG', label: 'Restore previous config', hint: 'recovery', run: restorePreviousConfig },
@@ -7193,7 +7848,7 @@
     }));
     commands.push({
       verb: 'PANEL',
-      label: state.settings?.enableSkills === false ? 'Enable Skills panel' : 'Disable Skills panel',
+      label: state.settings?.enableSkills === false ? 'Enable AI Workflow' : 'Disable AI Workflow',
       hint: 'Settings',
       run: () => updatePanelSetting('enableSkills', state.settings?.enableSkills === false),
     });
@@ -7476,7 +8131,49 @@
     await command.run();
   }
 
+  $('emptyState').addEventListener('click', async (event) => {
+    const addManually = event.target.closest('[data-add-target-manually]');
+    if (addManually) {
+      openProjectEditor();
+      return;
+    }
+    const copyRecovery = event.target.closest('[data-copy-target-recovery]');
+    if (!copyRecovery || copyRecovery.disabled) return;
+    const prompt = state.onboarding?.targetRecoveryPrompt || '';
+    if (!prompt) return;
+    try {
+      await navigator.clipboard.writeText(prompt);
+      copyRecovery.textContent = 'Copied';
+      pushFeed('TARGET_RECOVERY_PROMPT_COPIED', 'scope=target_registry', 'info');
+      setTimeout(() => {
+        if (copyRecovery.isConnected) copyRecovery.textContent = 'Copy recovery prompt';
+      }, 1600);
+    } catch {
+      toast('Clipboard unavailable. Open the recovery prompt and copy it manually.', true);
+    }
+  });
+
   $('targetList').addEventListener('click', async (event) => {
+    const modelAction = event.target.closest('[data-model-action]');
+    if (modelAction) {
+      if (!modelAction.disabled) {
+        await setLocalModelPower(modelAction.dataset.modelId, modelAction.dataset.modelAction);
+      }
+      return;
+    }
+    const copyLocalPrompt = event.target.closest('[data-copy-local-prompt]');
+    if (copyLocalPrompt) {
+      if (!state.localInferencePrompt) return;
+      try {
+        await navigator.clipboard.writeText(state.localInferencePrompt);
+        copyLocalPrompt.textContent = 'Copied';
+        pushFeed('MODEL_SETUP_PROMPT_COPIED', 'scope=local_inference', 'info');
+        setTimeout(() => { if (copyLocalPrompt.isConnected) copyLocalPrompt.textContent = 'Copy agent prompt'; }, 1600);
+      } catch {
+        toast('Clipboard unavailable. Select the prompt text manually.', true);
+      }
+      return;
+    }
     const workflowAction = event.target.closest('[data-workflow-action]');
     if (workflowAction) {
       await runWorkflowAction(workflowAction.dataset.workflowAction, workflowAction);
@@ -7637,9 +8334,11 @@
     pushFeed('MANUAL_SCAN', `view=${state.view}`, 'info');
     await Promise.all([
       loadSystem(),
+      loadLocalModels(true),
       loadOnboarding(),
       state.view === 'projects' ? loadProjects(true)
         : state.view === 'processes' ? Promise.all([loadProjects(true), loadProcesses(true)])
+        : state.view === 'localInference' ? loadLocalInferencePrompt(true)
         : state.view === 'scripts' ? loadScripts(true)
         : state.view === 'skills' ? loadSkills(true)
         : state.view === 'instructions' ? loadInstructions(true)
@@ -7661,27 +8360,6 @@
     $('defaultSkillsToggle').setAttribute('aria-pressed', String(state.showDefaultSkills));
     $('defaultSkillsToggle').textContent = state.showDefaultSkills ? 'Personal Skills' : 'Default Skills';
     renderTargets();
-  });
-
-  $('emptyState').addEventListener('click', async (event) => {
-    const wizardButton = event.target.closest('[data-onboarding-wizard]');
-    if (wizardButton) {
-      openSetupWizard();
-      pushFeed('SETUP_WIZARD_OPENED', 'source=empty_state', 'info');
-      return;
-    }
-    const button = event.target.closest('[data-copy-prompt]');
-    if (!button) return;
-    const prompt = state.onboarding?.prompts?.find((item) => item.id === button.dataset.copyPrompt);
-    if (!prompt) return;
-    try {
-      await navigator.clipboard.writeText(prompt.prompt);
-      button.textContent = 'Copied';
-      pushFeed('SETUP_PROMPT_COPIED', `scope=${slug(prompt.id)}`, 'info');
-      setTimeout(() => { button.textContent = 'Copy prompt'; }, 1600);
-    } catch {
-      toast('Clipboard unavailable. Select the prompt text manually.', true);
-    }
   });
 
   $('clearFeed').addEventListener('click', () => {
@@ -7829,6 +8507,21 @@
   $('settingsTrigger').addEventListener('click', () => {
     setSettingsOpen($('settingsPopover').hidden);
   });
+  $('promptLibraryTrigger').addEventListener('click', () => {
+    void openPromptLibrary();
+  });
+  $('copyFirstRunSetupPrompt').addEventListener('click', () => {
+    void copyFirstRunSetupPrompt();
+  });
+  $('firstRunSetupDialog').addEventListener('change', (event) => {
+    if (!event.target.matches('[data-first-run-section]')) return;
+    renderFirstRunSetupPrompt();
+  });
+  $('promptLibraryList').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-copy-library-prompt]');
+    if (!button || button.disabled) return;
+    void copyPromptLibraryEntry(button.dataset.copyLibraryPrompt, button);
+  });
   document.addEventListener('click', (event) => {
     if (!$('settingsPopover').hidden && !$('settingsShell').contains(event.target)) {
       setSettingsOpen(false);
@@ -7876,6 +8569,7 @@
     pollInFlight = true;
     try {
       const registryPoll = state.view === 'projects' ? loadProjects(true)
+        : state.view === 'localInference' ? loadLocalModels(true)
         : state.view === 'scripts' ? loadScripts(true)
         : state.view === 'skills' ? loadSkills(true)
         : Promise.all([loadProjects(true), loadProcesses(true)]);
@@ -7893,12 +8587,19 @@
       pushFeed('CONSOLE_BOOT', 'mode=process_control node=local', 'info');
       pushFeed('DIRECTIVE_LOADED', 'actions=initiate,terminate');
     }
-    await Promise.all([loadSystem(), loadProjects(), loadScripts(true), loadSettings(), loadOnboarding(), loadDoctor(), loadOfflineTools(), syncDesktopSettings(), syncDesktopUpdate(), syncDesktopBackend()]);
+    await Promise.all([loadSystem(), loadLocalModels(), loadProjects(), loadScripts(true), loadSettings(), loadOnboarding(), loadDoctor(), loadOfflineTools(), syncDesktopSettings(), syncDesktopUpdate(), syncDesktopBackend()]);
+    const needsCompleteHandoff = state.onboarding?.hasAnySetup === false
+      && !state.scriptsConfigured
+      && !(state.localModels.models || []).some((model) => model.available);
+    if (needsCompleteHandoff) {
+      await loadLocalInferencePrompt(true);
+    }
     const requestedTab = [...document.querySelectorAll('.view-tab')]
       .find((tab) => tab.dataset.view === REQUESTED_VIEW);
     if (VIEW_CONFIG[REQUESTED_VIEW] && requestedTab && !requestedTab.hidden) {
       setView(REQUESTED_VIEW);
     }
+    maybeOpenFirstRunSetup();
     setInterval(() => void pollVisibleView(), 3500);
   }
 

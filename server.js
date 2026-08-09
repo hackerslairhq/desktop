@@ -78,6 +78,7 @@ const {
   normalizeAiWorkflowSettings,
 } = require('./lib/runtime-config');
 const { LogStore } = require('./lib/log-store');
+const { createLocalModelService } = require('./lib/local-models');
 const { normalizeUiPreferences, validateUiPreferences } = require('./lib/ui-preferences');
 const { createPlatform } = require('./lib/platform');
 const {
@@ -108,6 +109,7 @@ const MAX_BODY_BYTES = 1024 * 1024;
 const runtimeConfig = createRuntimeConfig(__dirname);
 const runtimeIdentity = createRuntimeIdentity();
 const platform = createPlatform();
+const localModels = createLocalModelService({ platform, processDetails: getProcessSnapshot });
 const DATA_DIR = runtimeConfig.dataDirectory;
 const AGENTS_HOME = resolveAgentsHome();
 const CLAUDE_HOME = path.resolve(
@@ -1431,6 +1433,42 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (req.method === 'GET' && req.url === '/api/local-models') {
+      json(res, 200, await localModels.status());
+      return;
+    }
+
+    if (req.method === 'GET' && req.url === '/api/local-models/setup-prompt') {
+      json(res, 200, await localModels.setupPrompt());
+      return;
+    }
+
+    if (req.method === 'POST' && [
+      '/api/local-models/start',
+      '/api/local-models/stop',
+    ].includes(req.url)) {
+      let id;
+      try { id = String(JSON.parse(await readBody(req)).id || ''); }
+      catch { json(res, 400, { error: 'Invalid JSON body' }); return; }
+      const actionKey = 'local-models';
+      if (actionLocks.has(actionKey)) {
+        json(res, 409, { error: 'A local model action is already in progress.' });
+        return;
+      }
+      actionLocks.add(actionKey);
+      try {
+        const action = req.url.endsWith('/start') ? 'start' : 'stop';
+        const result = await localModels[action](id);
+        invalidateProcessSnapshot();
+        json(res, 200, result);
+      } catch (error) {
+        json(res, Number(error.status) || 500, { error: error.message });
+      } finally {
+        actionLocks.delete(actionKey);
+      }
+      return;
+    }
+
     if (req.method === 'POST' && req.url === '/api/open-ui') {
       let port;
       try { port = Number(JSON.parse(await readBody(req)).port); }
@@ -1747,7 +1785,7 @@ const server = http.createServer(async (req, res) => {
         scriptsFile: SCRIPTS_FILE,
         scriptsDirectory: scriptsAvailable ? scriptsConfig.scriptsDir : '',
         scripts: scriptsAvailable ? listScriptFiles(scriptsConfig.scriptsDir) : [],
-        scriptsSupported: scriptsAvailable,
+        scriptsSupported: platform.supportsScripts,
       }));
       return;
     }
