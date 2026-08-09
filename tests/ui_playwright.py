@@ -226,8 +226,17 @@ def assert_full_motion_canvas_settles(page) -> None:
 def assert_empty_state(page) -> None:
     empty_state = page.locator("#emptyState")
     expect(empty_state).to_be_visible()
-    expect(empty_state).to_contain_text("No matching targets detected")
-    expect(empty_state.locator(".onboarding-path")).to_have_count(0)
+    expect(empty_state).to_contain_text("No targets loaded")
+    recovery = empty_state.get_by_role("region", name="Target registry recovery")
+    expect(recovery).to_contain_text("Your project folders may still be intact")
+    expect(recovery.locator("pre")).to_contain_text("prior valid projects.json")
+    OUTPUT_DIRECTORY.mkdir(exist_ok=True)
+    page.screenshot(
+        path=str(OUTPUT_DIRECTORY / "target-recovery-1440x900.png"),
+        full_page=False,
+    )
+    recovery.get_by_role("button", name="Copy recovery prompt", exact=True).click()
+    expect(recovery.get_by_role("button", name="Copied", exact=True)).to_be_visible()
 
 
 def assert_project_editor_controls(page, selected_folder: Path) -> None:

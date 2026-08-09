@@ -1574,6 +1574,17 @@
     text-transform: uppercase;
   }
 
+  .empty.target-recovery-empty {
+    padding: 16px;
+    text-align: left;
+    text-transform: none;
+  }
+
+  .target-recovery-empty .agent-assisted-card {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
   .card-toggle {
     padding: 3px 7px;
     border: 1px solid var(--line);
@@ -6027,6 +6038,25 @@
     `;
   }
 
+  function targetRecoveryEmptyHtml() {
+    const prompt = state.onboarding?.targetRecoveryPrompt || '';
+    return `
+      <section class="agent-assisted-card" role="region" aria-label="Target registry recovery">
+        <div class="section-kicker">Target registry · recovery available</div>
+        <h3>No targets loaded</h3>
+        <p>Your project folders may still be intact. Have your agent check for a prior Hacker's Lair registry before scanning folders or creating replacement entries.</p>
+        <div class="config-controls">
+          <button class="utility" type="button" data-copy-target-recovery ${prompt ? '' : 'disabled'}>Copy recovery prompt</button>
+          <button class="utility" type="button" data-add-target-manually>Add manually</button>
+        </div>
+        <details>
+          <summary>Review recovery prompt</summary>
+          <pre>${esc(prompt || 'Recovery prompt unavailable. Refresh the registry and try again.')}</pre>
+        </details>
+      </section>
+    `;
+  }
+
   function renderTargets() {
     if (state.view === 'localInference') {
       $('emptyState').hidden = true;
@@ -6043,10 +6073,17 @@
       : visibleAgentOps();
     const scanningSkills = state.view === 'skills' && !state.skillsLoaded;
     const hasSupplementalContent = ['instructions', 'agentOps'].includes(state.view);
-    $('emptyState').hidden = rows.length > 0 || hasSupplementalContent;
-    $('emptyState').textContent = scanningSkills
-      ? 'Scanning shared agent skill folder...'
-      : VIEW_CONFIG[state.view].empty;
+    const targetRegistryEmpty = state.view === 'projects' && state.projects.length === 0;
+    const emptyState = $('emptyState');
+    emptyState.hidden = rows.length > 0 || hasSupplementalContent;
+    emptyState.classList.toggle('target-recovery-empty', targetRegistryEmpty);
+    if (targetRegistryEmpty) {
+      emptyState.innerHTML = targetRecoveryEmptyHtml();
+    } else {
+      emptyState.textContent = scanningSkills
+        ? 'Scanning shared agent skill folder...'
+        : VIEW_CONFIG[state.view].empty;
+    }
     const skillsSetup = state.view === 'skills' ? aiWorkflowSetupHtml() : '';
     const skillRouter = state.view === 'skills' && state.skillsLoaded ? skillRouterHtml() : '';
     const archived = state.view === 'skills' && !state.showDefaultSkills
@@ -8121,6 +8158,28 @@
     closeCommandPalette();
     await command.run();
   }
+
+  $('emptyState').addEventListener('click', async (event) => {
+    const addManually = event.target.closest('[data-add-target-manually]');
+    if (addManually) {
+      openProjectEditor();
+      return;
+    }
+    const copyRecovery = event.target.closest('[data-copy-target-recovery]');
+    if (!copyRecovery || copyRecovery.disabled) return;
+    const prompt = state.onboarding?.targetRecoveryPrompt || '';
+    if (!prompt) return;
+    try {
+      await navigator.clipboard.writeText(prompt);
+      copyRecovery.textContent = 'Copied';
+      pushFeed('TARGET_RECOVERY_PROMPT_COPIED', 'scope=target_registry', 'info');
+      setTimeout(() => {
+        if (copyRecovery.isConnected) copyRecovery.textContent = 'Copy recovery prompt';
+      }, 1600);
+    } catch {
+      toast('Clipboard unavailable. Open the recovery prompt and copy it manually.', true);
+    }
+  });
 
   $('targetList').addEventListener('click', async (event) => {
     const modelAction = event.target.closest('[data-model-action]');

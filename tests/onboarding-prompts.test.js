@@ -90,6 +90,24 @@ test('empty installations expose one complete first-run handoff', () => {
   assert.match(state.firstRunSections[1].prompt, /canonical workspace skill directory/);
 });
 
+test('an empty target registry exposes recovery even when other workflow setup exists', () => {
+  const state = onboardingState({
+    projectsFile: fixtures.projectsFile,
+    projectsSchemaFile: fixtures.schemaFile,
+    projectsSchemaUrl: 'http://localhost:4951/api/schema/projects',
+    agentsHome: fixtures.agentsHome,
+    projects: [],
+    skills: [{ name: 'verify', kind: 'personal' }],
+    usageLogFile: fixtures.usageLogFile,
+    hookInstalled: true,
+  });
+
+  assert.equal(state.hasAnySetup, true);
+  assert.equal(state.firstRunPrompt, '');
+  assert.match(state.targetRecoveryPrompt, /Set up Hacker's Lair targets/);
+  assert.match(state.targetRecoveryPrompt, /prior valid projects\.json/i);
+});
+
 test('project prompts require the live runtime schema URL', () => {
   assert.throws(() => configurationPrompts({
     projectsFile: fixtures.projectsFile,
