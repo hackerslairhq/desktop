@@ -3272,15 +3272,37 @@
     border-radius: 3px;
     background: var(--line);
   }
-  .first-run-scope span {
+  .first-run-scope label {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
     padding: 9px 10px;
-    color: var(--cyan);
+    color: var(--dim);
     background: rgba(var(--surface-strong-rgb), .94);
+    cursor: pointer;
+    transition: color .14s, background .14s;
+  }
+  .first-run-scope label:has(input:checked) {
+    color: var(--cyan);
+    background: rgba(var(--accent-rgb), .055);
+  }
+  .first-run-scope input {
+    width: 13px;
+    height: 13px;
+    margin: 0;
+    accent-color: var(--green);
+  }
+  .first-run-scope span {
+    overflow: hidden;
     font-size: 8px;
     font-weight: 900;
     letter-spacing: .08em;
     text-align: center;
+    text-overflow: ellipsis;
     text-transform: uppercase;
+    white-space: nowrap;
   }
   .first-run-handoff {
     display: grid;
@@ -3734,7 +3756,7 @@
           <div class="view-tabs" role="tablist" aria-label="Console view">
             <button class="view-tab active" data-view="projects" role="tab" aria-selected="true">Targets</button>
             <button class="view-tab" data-view="processes" role="tab" aria-selected="false">Port Signals</button>
-            <button class="view-tab" id="localInferenceTab" data-view="localInference" role="tab" aria-selected="false">Model Bay</button>
+            <button class="view-tab" id="localInferenceTab" data-view="localInference" role="tab" aria-selected="false">Local Models</button>
             <button class="view-tab" id="scriptsTab" data-view="scripts" role="tab" aria-selected="false" hidden>Scripts</button>
             <button class="view-tab" id="skillsTab" data-view="skills" role="tab" aria-selected="false" hidden>Skills</button>
             <button class="view-tab" id="instructionsTab" data-view="instructions" role="tab" aria-selected="false" hidden>Instructions</button>
@@ -3949,10 +3971,10 @@
     <div class="dialog-body">
       <p class="first-run-intro">Copy one machine-aware prompt to your coding agent. It audits this PC, configures every supported Hacker's Lair area in a safe order, preserves anything it finds, and verifies the finished setup.</p>
       <div class="first-run-scope" aria-label="Setup coverage">
-        <span>Targets</span>
-        <span>AI Workflow</span>
-        <span>Automation</span>
-        <span>Model Bay</span>
+        <label><input type="checkbox" data-first-run-section="targets" checked><span>Targets</span></label>
+        <label><input type="checkbox" data-first-run-section="skills" checked><span>Skills</span></label>
+        <label><input type="checkbox" data-first-run-section="automation" checked><span>Automation</span></label>
+        <label><input type="checkbox" data-first-run-section="local-models" checked><span>Local Models</span></label>
       </div>
       <section class="first-run-handoff">
         <div class="section-kicker">One complete prompt</div>
@@ -4215,7 +4237,7 @@
   const VIEW_CONFIG = {
     projects: { title: 'Targets', placeholder: 'filter targets by name, branch, module, path, pid, or port', empty: 'No matching targets detected.' },
     processes: { title: 'Port Signals', placeholder: 'filter signals by name, path, pid, or port', empty: 'No matching port signals detected.' },
-    localInference: { title: 'Model Bay', placeholder: 'filter local models by name, quant, or source', empty: 'No matching local models detected.' },
+    localInference: { title: 'Local Models', placeholder: 'filter local models by name, quant, or source', empty: 'No matching local models detected.' },
     scripts: { title: 'Scripts', placeholder: 'filter scripts by name, file, or description', empty: 'No matching scripts detected.' },
     skills: { title: 'Skills', placeholder: 'filter skills by name, source, or description', empty: 'No matching skills detected.' },
     instructions: { title: 'Instructions', placeholder: 'filter AGENTS.md and CLAUDE.md by path', empty: 'No workspace instruction files detected.' },
@@ -4869,7 +4891,7 @@
     const setupPanel = setupComplete
       ? ''
       : `
-        <section class="local-agent-handoff" aria-label="Agent-assisted Model Bay setup">
+        <section class="local-agent-handoff" aria-label="Agent-assisted Local Models setup">
           <div class="agent-handoff-copy">
             <div class="section-kicker">Agent handoff</div>
             <h3>Set up this machine with your agent</h3>
@@ -4950,7 +4972,7 @@
       entries.push({ id, title, scope, prompt: normalized });
     };
 
-    add('model-bay', 'Model Bay setup', 'Models · native Windows', state.localInferencePrompt);
+    add('local-models', 'Local Models setup', 'Models · native Windows', state.localInferencePrompt);
     (state.onboarding?.prompts || []).forEach((entry) => {
       add(`onboarding-${entry.id}`, entry.title, 'First-run setup', entry.prompt);
     });
@@ -5013,19 +5035,55 @@
     }
   }
 
-  function firstRunSetupPrompt() {
-    const corePrompt = String(state.onboarding?.firstRunPrompt || '').trim();
-    if (!corePrompt) return '';
-    const sections = [corePrompt];
-    if (state.localModels.supported && state.localInferencePrompt) {
-      sections.push([
-        'After the core setup is verified, configure Model Bay for this machine.',
-        '',
-        state.localInferencePrompt.trim(),
-      ].join('\n'));
+  function firstRunSectionSelection() {
+    return new Set([...document.querySelectorAll('[data-first-run-section]:checked')]
+      .map((input) => input.dataset.firstRunSection));
+  }
+
+  function selectedFirstRunSections() {
+    const selected = firstRunSectionSelection();
+    const sections = (state.onboarding?.firstRunSections || [])
+      .filter((section) => selected.has(section.id) && section.prompt)
+      .map((section) => ({
+        id: section.id,
+        title: section.title,
+        prompt: section.prompt.trim(),
+      }));
+    if (selected.has('local-models') && state.localInferencePrompt) {
+      sections.push({
+        id: 'local-models',
+        title: 'Local Models',
+        prompt: state.localInferencePrompt.trim(),
+      });
     }
-    sections.push("When every approved area is complete, reopen Hacker's Lair and verify each enabled tab against the real files and processes on this machine. Report what changed, what was already present, what remains optional, and every verification result.");
-    return sections.join('\n\n');
+    return sections;
+  }
+
+  function firstRunSetupPrompt() {
+    const sections = selectedFirstRunSections();
+    if (!sections.length) return '';
+    const sequence = sections.map((section, index) => [
+      `${index + 1}. ${section.title.toUpperCase()}`,
+      '',
+      section.prompt,
+    ].join('\n')).join('\n\n');
+    return [
+      "Set up the selected Hacker's Lair areas for this machine.",
+      `Selected areas: ${sections.map((section) => section.title).join(', ')}.`,
+      '',
+      'Use one coordinated pass. Inspect the machine and every referenced file read-only before changing anything. Preserve valid existing configuration and back up each file before editing it. A selected area may be completely absent; in that case, create its setup safely instead of skipping it. Ask before installing software, downloading large model files, choosing a machine-wide folder, or resolving an ambiguous path, command, port, hook, or automation behavior.',
+      '',
+      sequence,
+      '',
+      "When every selected area is complete, reopen Hacker's Lair and verify each enabled tab against the real files and processes on this machine. Report what changed, what was already present, what remains optional, and every verification result.",
+    ].join('\n');
+  }
+
+  function renderFirstRunSetupPrompt() {
+    const prompt = firstRunSetupPrompt();
+    $('firstRunSetupPrompt').textContent = prompt
+      || 'Select at least one setup area to build the agent handoff.';
+    $('copyFirstRunSetupPrompt').disabled = !prompt;
   }
 
   function shouldShowFirstRunSetup() {
@@ -5040,7 +5098,7 @@
   function maybeOpenFirstRunSetup() {
     if (!shouldShowFirstRunSetup()) return;
     state.firstRunPromptShown = true;
-    $('firstRunSetupPrompt').textContent = firstRunSetupPrompt();
+    renderFirstRunSetupPrompt();
     $('firstRunSetupDialog').showModal();
     pushFeed('FIRST_RUN_HANDOFF_OPENED', 'scope=complete_setup', 'info');
   }
@@ -7749,7 +7807,7 @@
       { verb: 'COPY', label: 'Copy redacted Doctor report', hint: 'support', run: copyDoctorReport },
       { verb: 'ADD', label: 'Add project', hint: 'schema-backed editor', run: () => openProjectEditor() },
       { verb: 'SCAN', label: 'Scan folder', hint: 'project discovery', run: openSetupWizard },
-      { verb: 'LOCAL AI', label: 'Open Model Bay', hint: 'models and agent setup', run: () => setView('localInference') },
+      { verb: 'LOCAL AI', label: 'Open Local Models', hint: 'models and agent setup', run: () => setView('localInference') },
       { verb: 'PROMPTS', label: 'Open Agent Prompts', hint: 'Settings library', run: openPromptLibrary },
       { verb: 'RELEASE', label: 'Open release notes', hint: 'GitHub Releases', run: openReleaseNotes },
       { verb: 'CONFIG', label: 'Export redacted config', hint: 'backup', run: exportRedactedConfig },
@@ -8454,6 +8512,10 @@
   $('copyFirstRunSetupPrompt').addEventListener('click', () => {
     void copyFirstRunSetupPrompt();
   });
+  $('firstRunSetupDialog').addEventListener('change', (event) => {
+    if (!event.target.matches('[data-first-run-section]')) return;
+    renderFirstRunSetupPrompt();
+  });
   $('promptLibraryList').addEventListener('click', (event) => {
     const button = event.target.closest('[data-copy-library-prompt]');
     if (!button || button.disabled) return;
@@ -8528,7 +8590,7 @@
     const needsCompleteHandoff = state.onboarding?.hasAnySetup === false
       && !state.scriptsConfigured
       && !(state.localModels.models || []).some((model) => model.available);
-    if (needsCompleteHandoff && state.localModels.supported) {
+    if (needsCompleteHandoff) {
       await loadLocalInferencePrompt(true);
     }
     const requestedTab = [...document.querySelectorAll('.view-tab')]

@@ -158,13 +158,25 @@ def project_fixture(
 def assert_first_run_setup(page) -> None:
     dialog = page.get_by_role("dialog", name="Commission Your Lair")
     expect(dialog).to_be_visible()
+    for section in ["Targets", "Skills", "Automation", "Local Models"]:
+        expect(dialog.get_by_role("checkbox", name=section, exact=True)).to_be_checked()
     expect(dialog.get_by_text("One complete prompt", exact=True)).to_be_visible()
     expect(dialog.locator("#firstRunSetupPrompt")).to_contain_text(
-        "Set up Hacker's Lair completely for this machine"
+        "Set up the selected Hacker's Lair areas for this machine"
     )
-    expect(dialog.locator("#firstRunSetupPrompt")).to_contain_text("Model Bay")
+    expect(dialog.locator("#firstRunSetupPrompt")).to_contain_text("Local Models")
     expect(dialog.locator("pre")).to_have_count(1)
     expect(dialog).to_contain_text("Settings → Agent Prompts")
+    dialog.get_by_role("checkbox", name="Local Models", exact=True).uncheck()
+    expect(dialog.locator("#firstRunSetupPrompt")).not_to_contain_text(
+        "Set up Hacker's Lair Local Models"
+    )
+    dialog.get_by_role("checkbox", name="Skills", exact=True).uncheck()
+    expect(dialog.locator("#firstRunSetupPrompt")).not_to_contain_text(
+        "canonical workspace skill directory"
+    )
+    dialog.get_by_role("checkbox", name="Local Models", exact=True).check()
+    dialog.get_by_role("checkbox", name="Skills", exact=True).check()
     dialog.get_by_role("button", name="Copy Full Setup Prompt", exact=True).click()
     expect(
         dialog.get_by_role("button", name="Copied · Paste Into Your Agent", exact=True)
@@ -323,7 +335,7 @@ def assert_local_model_controls(page) -> None:
         if request.url.endswith("/setup-prompt"):
             route.fulfill(
                 json={
-                    "prompt": "Set up Hacker's Lair Model Bay at C:\\llama.cpp.\n"
+                    "prompt": "Set up Hacker's Lair Local Models at C:\\llama.cpp.\n"
                     "Use Vulkan and never run both models at once."
                 }
             )
@@ -337,7 +349,7 @@ def assert_local_model_controls(page) -> None:
 
     page.route("**/api/local-models", handle)
     page.route("**/api/local-models/**", handle)
-    page.get_by_role("tab", name="Model Bay", exact=True).click()
+    page.get_by_role("tab", name="Local Models", exact=True).click()
     page.evaluate("Promise.all([loadLocalModels(true), loadLocalInferencePrompt(true)])")
     panel = page.locator(".local-inference-deck")
     channels = panel.locator(".model-channel")
@@ -353,7 +365,7 @@ def assert_local_model_controls(page) -> None:
     page.set_viewport_size({"width": 900, "height": 620})
     assert not page.evaluate(
         "document.documentElement.scrollWidth > document.documentElement.clientWidth"
-    ), "Model Bay has horizontal overflow at 900x620."
+    ), "Local Models has horizontal overflow at 900x620."
     page.set_viewport_size({"width": 1440, "height": 900})
     setup_ready["value"] = True
     page.evaluate("loadLocalModels(true)")
@@ -367,15 +379,15 @@ def assert_local_model_controls(page) -> None:
         }"""
     )
     assert unused_space_below_deck <= 20, (
-        f"Model Bay reserves {unused_space_below_deck}px below its content."
+        f"Local Models reserves {unused_space_below_deck}px below its content."
     )
 
     page.get_by_role("button", name="Settings", exact=True).click()
     page.get_by_role("button", name=re.compile(r"Agent prompts")).click()
     prompt_dialog = page.get_by_role("dialog", name="Agent Prompts")
     expect(prompt_dialog).to_be_visible()
-    model_prompt = prompt_dialog.locator('[data-prompt-library-id="model-bay"]')
-    expect(model_prompt).to_contain_text("Model Bay setup")
+    model_prompt = prompt_dialog.locator('[data-prompt-library-id="local-models"]')
+    expect(model_prompt).to_contain_text("Local Models setup")
     expect(model_prompt.locator("pre")).to_contain_text("Use Vulkan")
     OUTPUT_DIRECTORY.mkdir(exist_ok=True)
     page.screenshot(

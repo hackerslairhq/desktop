@@ -78,11 +78,16 @@ test('empty installations expose one complete first-run handoff', () => {
   });
 
   assert.equal(state.hasAnySetup, false);
+  assert.deepEqual(
+    state.firstRunSections.map((section) => section.id),
+    ['targets', 'skills', 'automation'],
+  );
   assert.match(state.firstRunPrompt, /Set up Hacker's Lair completely for this machine/);
   assert.match(state.firstRunPrompt, /Set up Hacker's Lair targets/);
   assert.match(state.firstRunPrompt, /configure my personal agent skills/i);
   assert.match(state.firstRunPrompt, /set up AI workflow usage tracking/i);
   assert.match(state.firstRunPrompt, /review local automation support/i);
+  assert.match(state.firstRunSections[1].prompt, /canonical workspace skill directory/);
 });
 
 test('project prompts require the live runtime schema URL', () => {
@@ -161,6 +166,7 @@ test('returns portable machine paths and only the missing setup area', () => {
   assert.equal(state.configured, false);
   assert.equal(state.hasAnySetup, true);
   assert.equal(state.firstRunPrompt, '');
+  assert.deepEqual(state.firstRunSections, []);
   assert.deepEqual(state.prompts.map((prompt) => prompt.id), ['skills']);
   assert.equal(state.skillsDirectory, path.join(fixtures.agentsHome, 'skills'));
 });

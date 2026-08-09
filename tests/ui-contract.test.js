@@ -114,12 +114,17 @@ test('a new installation gets one complete setup prompt in a first-run popup', (
     'id="firstRunSetupPrompt"',
     'id="copyFirstRunSetupPrompt"',
     'maybeOpenFirstRunSetup',
-    'state.onboarding?.firstRunPrompt',
+    'state.onboarding?.firstRunSections',
+    'data-first-run-section="targets" checked',
+    'data-first-run-section="skills" checked',
+    'data-first-run-section="automation" checked',
+    'data-first-run-section="local-models" checked',
   ]) {
     assert.match(html, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   assert.match(html, /Copy one machine-aware prompt to your coding agent/);
   assert.match(html, /Open Settings → Agent Prompts for focused, machine-aware handoffs/);
+  assert.match(html, /firstRunSectionSelection/);
   assert.doesNotMatch(html, /function onboardingHtml\(/);
 });
 
@@ -260,15 +265,15 @@ test('runtime resilience controls surface backend and log state', () => {
   assert.match(html, /\/api\/logs\/clear/);
 });
 
-test('Model Bay exposes exclusive power controls and only shows setup when needed', () => {
+test('Local Models exposes exclusive power controls and only shows setup when needed', () => {
   assert.match(html, /id="localInferenceTab"[^>]*data-view="localInference"/);
-  assert.match(html, />Model Bay<\/button>/);
+  assert.match(html, />Local Models<\/button>/);
+  assert.doesNotMatch(html, /Model Bay/);
   assert.match(html, /class="local-agent-handoff"/);
   assert.match(html, /data-copy-local-prompt/);
   assert.match(html, /Set up this machine with your agent/);
   assert.match(html, /snapshot\.models\.every\(\(model\) => model\.available\)/);
   assert.doesNotMatch(html, /Setup complete\. Future setup and expansion prompts live in Settings/);
-  assert.doesNotMatch(html, /model-bay-setup-complete/);
   assert.match(html, /data-model-action="start"/);
   assert.match(html, /data-model-action="stop"/);
   assert.match(html, /One model can be online at a time/);
