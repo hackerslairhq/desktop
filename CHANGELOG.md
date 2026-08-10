@@ -7,6 +7,11 @@ and this project follows [Semantic Versioning](VERSIONING.md).
 
 ## [Unreleased]
 
+### Changed
+
+- Local Models actions now use the same Initiate and Terminate language as
+  target controls.
+
 ## [2.1.0-beta.12] - 2026-08-09
 
 ### Added
