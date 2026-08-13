@@ -4819,8 +4819,8 @@
             <span class="model-path" title="${esc(model.files?.model || '')}">${esc(model.files?.model || '')}</span>
             <div class="model-switch action-cluster compact" aria-label="${esc(model.name)} power controls">
               ${active
-                ? `<button class="action terminate" type="button" data-model-action="stop" data-model-id="${esc(model.id)}" title="${esc(`Stop ${model.name}`)}" ${stopDisabled ? 'disabled' : ''}>Off</button>`
-                : `<button class="action initiate" type="button" data-model-action="start" data-model-id="${esc(model.id)}" title="${esc(startDisabled && blockedByOther ? 'Stop the active model first.' : missing || `Start ${model.name}`)}" ${startDisabled ? 'disabled' : ''}>On</button>`}
+                ? `<button class="action terminate" type="button" data-model-action="stop" data-model-id="${esc(model.id)}" title="${esc(`Terminate ${model.name}`)}" ${stopDisabled ? 'disabled' : ''}>TERMINATE</button>`
+                : `<button class="action initiate" type="button" data-model-action="start" data-model-id="${esc(model.id)}" title="${esc(startDisabled && blockedByOther ? 'Terminate the active model first.' : missing || `Initiate ${model.name}`)}" ${startDisabled ? 'disabled' : ''}>INITIATE</button>`}
             </div>
           </section>
         `;

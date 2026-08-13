@@ -276,6 +276,8 @@ test('Local Models exposes exclusive power controls and only shows setup when ne
   assert.doesNotMatch(html, /Setup complete\. Future setup and expansion prompts live in Settings/);
   assert.match(html, /data-model-action="start"/);
   assert.match(html, /data-model-action="stop"/);
+  assert.match(html, /data-model-action="start"[^>]*>INITIATE<\/button>/);
+  assert.match(html, /data-model-action="stop"[^>]*>TERMINATE<\/button>/);
   assert.match(html, /One model can be online at a time/);
   assert.match(html, /\/api\/local-models/);
   assert.match(html, /MODEL_\$\{action\.toUpperCase\(\)\}_REQUEST/);

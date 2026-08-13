@@ -7,6 +7,18 @@ and this project follows [Semantic Versioning](VERSIONING.md).
 
 ## [Unreleased]
 
+## [2.1.0-beta.13] - 2026-08-13
+
+### Changed
+
+- Local Models actions now use the same Initiate and Terminate language as
+  target controls.
+
+### Fixed
+
+- Replaced the vulnerable `extract-zip` packaging dependency with Electron's
+  maintained drop-in fork.
+
 ## [2.1.0-beta.12] - 2026-08-09
 
 ### Added
@@ -249,7 +261,8 @@ and this project follows [Semantic Versioning](VERSIONING.md).
 - Added Host validation, JSON-only mutations, restrictive CSP, origin-checked
   desktop IPC, action locks, and last-known-good config behavior.
 
-[Unreleased]: https://github.com/hackerslairhq/desktop/compare/v2.1.0-beta.12...HEAD
+[Unreleased]: https://github.com/hackerslairhq/desktop/compare/v2.1.0-beta.13...HEAD
+[2.1.0-beta.13]: https://github.com/hackerslairhq/desktop/compare/v2.1.0-beta.12...v2.1.0-beta.13
 [2.1.0-beta.12]: https://github.com/hackerslairhq/desktop/compare/v2.1.0-beta.11...v2.1.0-beta.12
 [2.1.0-beta.11]: https://github.com/hackerslairhq/desktop/compare/v2.1.0-beta.10...v2.1.0-beta.11
 [2.1.0-beta.10]: https://github.com/hackerslairhq/desktop/compare/v2.1.0-beta.9...v2.1.0-beta.10
