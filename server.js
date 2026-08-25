@@ -2957,7 +2957,13 @@ const server = http.createServer(async (req, res) => {
         stopped.unshift(entry);
         if (stopped.length > MAX_STOPPED) stopped.length = MAX_STOPPED;
         saveStopped();
-        json(res, 200, { ok: true, name: target.label || target.name, pid, canRestart: !!entry.cmd });
+        json(res, 200, {
+          ok: true,
+          name: target.label || target.name,
+          pid,
+          canRestart: !!entry.cmd,
+          restartId: entry.cmd ? entry.id : null,
+        });
       } catch (err) {
         json(res, 500, { error: `Process termination failed: ${err.message}` });
       }

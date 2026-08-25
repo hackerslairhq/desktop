@@ -302,6 +302,54 @@ def assert_target_states(page, live_port: int, dormant_port: int) -> None:
     expect(dormant.locator(".configured-port-chip")).to_have_text(f":{dormant_port}")
     expect(dormant.get_by_text("DETECTED", exact=True)).to_have_count(0)
 
+    running_now = page.get_by_role("region", name="Running applications")
+    expect(running_now).to_be_visible()
+    expect(running_now).to_contain_text("Live Fixture")
+    expect(running_now).not_to_contain_text("Dormant Fixture")
+
+    live_controls = live.get_by_role("group", name="Live Fixture window controls")
+    expect(live_controls.get_by_role("button", name="Stop Live Fixture")).to_be_enabled()
+    restart_live = live_controls.get_by_role("button", name="Restart Live Fixture")
+    expect(restart_live).to_be_enabled()
+    expect(live_controls.get_by_role("button", name="Open Live Fixture")).to_be_enabled()
+
+    dormant_controls = dormant.get_by_role("group", name="Dormant Fixture window controls")
+    expect(dormant_controls.get_by_role("button", name="Dormant Fixture is already stopped")).to_be_disabled()
+    expect(dormant_controls.get_by_role("button", name="Start Dormant Fixture before restarting")).to_be_disabled()
+    expect(dormant_controls.get_by_role("button", name="Start Dormant Fixture", exact=True)).to_be_enabled()
+
+    lifecycle_calls: list[tuple[str, str]] = []
+
+    def mock_project_lifecycle(route) -> None:
+        payload = json.loads(route.request.post_data or "{}")
+        action = "stop" if route.request.url.endswith("/stop") else "start"
+        lifecycle_calls.append((action, payload.get("name", "")))
+        response = {"ok": True}
+        if action == "start":
+            response.update({"started": ["fixture"], "failed": []})
+        route.fulfill(status=200, content_type="application/json", body=json.dumps(response))
+
+    page.route("**/api/projects/stop", mock_project_lifecycle)
+    page.route("**/api/projects/start", mock_project_lifecycle)
+    restart_live.click()
+    expect(page.locator("#toast")).to_contain_text("Live Fixture restarted.")
+    assert lifecycle_calls == [
+        ("stop", "Live Fixture"),
+        ("start", "Live Fixture"),
+    ]
+    page.unroute("**/api/projects/stop", mock_project_lifecycle)
+    page.unroute("**/api/projects/start", mock_project_lifecycle)
+
+    for width in (320, 375, 414, 768):
+        page.set_viewport_size({"width": width, "height": 720})
+        expect(page.get_by_role("region", name="Running applications")).to_be_visible()
+        expect(live.locator(".traffic-control")).to_have_count(3)
+        has_overflow = page.evaluate(
+            "() => document.documentElement.scrollWidth > document.documentElement.clientWidth"
+        )
+        assert not has_overflow, f"Traffic controls overflow at {width}px."
+    page.set_viewport_size({"width": 1440, "height": 900})
+
     live_actions = live.locator(".action-cluster .action")
     expect(live_actions).to_have_count(1)
     expect(live_actions).to_have_text("TERMINATE")
@@ -474,6 +522,11 @@ def assert_port_signal_action_tray(page, live_port: int) -> None:
     actions = signal.locator(".action-cluster .action")
     expect(actions).to_have_count(1)
     expect(actions).to_have_text("TERMINATE")
+    controls = signal.locator(".traffic-controls")
+    expect(controls).to_be_visible()
+    expect(controls.locator(".traffic-control")).to_have_count(3)
+    expect(controls.locator(".traffic-control.stop")).to_be_enabled()
+    expect(controls.locator(".traffic-control.go")).to_be_enabled()
     tray_box = signal.locator(".action-cluster").bounding_box()
     action_box = actions.bounding_box()
     assert tray_box is not None and action_box is not None
@@ -505,6 +558,11 @@ def assert_script_action_tray(page, script_name: str) -> None:
     expect(actions).to_have_count(1)
     expect(actions).to_have_text("INITIATE")
     expect(actions).to_be_visible()
+    controls = script.locator(".traffic-controls")
+    expect(controls.locator(".traffic-control")).to_have_count(3)
+    expect(controls.locator(".traffic-control.stop")).to_be_disabled()
+    expect(controls.locator(".traffic-control.restart")).to_be_disabled()
+    expect(controls.locator(".traffic-control.go")).to_be_enabled()
     tray_box = script.locator(".action-cluster").bounding_box()
     action_box = actions.bounding_box()
     assert tray_box is not None and action_box is not None

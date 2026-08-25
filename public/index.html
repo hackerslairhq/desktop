@@ -64,6 +64,9 @@
     --font-scale: 100%;
     --shadow: 0 18px 58px rgba(0, 0, 0, .42);
     --mono: "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-micro: 120ms;
+    --dur-short: 220ms;
   }
 
   :root[data-theme="ultraviolet"] {
@@ -1242,6 +1245,154 @@
   .machine-lights span:nth-child(1) { background: var(--red); }
   .machine-lights span:nth-child(2) { background: var(--amber); }
   .machine-lights span:nth-child(3) { background: var(--green); box-shadow: 0 0 8px rgba(var(--accent-rgb), .18); }
+
+  /* Hallmark Â· component: target traffic controls Â· genre: atmospheric Â· theme: curated console
+   * states: default Â· hover Â· focus Â· active Â· disabled Â· loading Â· error Â· success
+   * contrast: pass (icon + text labels; colour is never the only signal)
+   */
+  .traffic-controls {
+    display: inline-flex;
+    flex: none;
+    gap: 1px;
+    align-items: center;
+  }
+
+  .traffic-control {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform var(--dur-micro) var(--ease-out), opacity var(--dur-micro) var(--ease-out);
+  }
+
+  .traffic-control::after {
+    width: 10px;
+    height: 10px;
+    border: 1px solid rgba(var(--white-rgb), .2);
+    border-radius: 50%;
+    background: var(--dim);
+    content: "";
+  }
+
+  .traffic-control.stop::after { background: var(--red); }
+  .traffic-control.restart::after { background: var(--amber); }
+  .traffic-control.go::after {
+    background: var(--green);
+    box-shadow: 0 0 8px rgba(var(--accent-rgb), .18);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .traffic-control:not(:disabled):hover { transform: translateY(-1px); }
+    .traffic-control:not(:disabled):hover::after { border-color: var(--text); }
+  }
+
+  .traffic-control:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 1px;
+  }
+
+  .traffic-control:not(:disabled):active { transform: translateY(1px); }
+
+  .traffic-control:disabled {
+    opacity: .34;
+    cursor: not-allowed;
+  }
+
+  .traffic-control[data-state="loading"]::after {
+    background: transparent;
+    border-color: var(--muted);
+    border-top-color: var(--text);
+    animation: trafficSpin .8s linear infinite;
+  }
+
+  .target-card.signal-lost .traffic-controls {
+    outline: 1px dashed var(--red);
+    outline-offset: 1px;
+    border-radius: 12px;
+  }
+
+  .target-card.live .traffic-control.go::after { border-color: var(--text); }
+
+  @keyframes trafficSpin { to { transform: rotate(360deg); } }
+
+  .running-now {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid rgba(var(--accent-rgb), .2);
+    border-radius: 6px;
+    color: var(--text);
+    background: rgba(var(--surface-rgb), .72);
+  }
+
+  .running-now-label {
+    display: inline-flex;
+    flex: none;
+    gap: 7px;
+    align-items: baseline;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .running-now-label strong {
+    color: var(--green);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .running-now-list {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .running-app {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    min-width: 0;
+    padding: 4px 8px;
+    border: 1px solid rgba(var(--accent-rgb), .14);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .running-app::before {
+    width: 6px;
+    height: 6px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--green);
+    content: "";
+  }
+
+  .running-now-empty,
+  .running-now-more {
+    overflow: hidden;
+    color: var(--dim);
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (pointer: coarse) {
+    .traffic-control {
+      width: 44px;
+      height: 44px;
+    }
+  }
 
   .machine-label {
     min-width: 0;
@@ -4745,6 +4896,7 @@
   function projectStatus(project) {
     const busy = state.busy.get(targetKey('project', project.name));
     if (busy?.mode === 'booting') return { key: 'booting', label: 'BOOTING' };
+    if (busy?.mode === 'restarting') return { key: 'booting', label: 'RESTARTING' };
     if (busy?.mode === 'terminating') return { key: 'terminating', label: 'TERMINATING' };
     if (project.errored) return { key: 'signal-lost', label: 'SIGNAL LOST' };
     if (project.starting) return { key: 'booting', label: 'BOOTING' };
@@ -4764,6 +4916,7 @@
     const key = targetKey(process.stopped ? 'stopped-process' : 'process', id);
     const busy = state.busy.get(key);
     if (busy?.mode === 'booting') return { key: 'booting', label: 'BOOTING' };
+    if (busy?.mode === 'restarting') return { key: 'booting', label: 'RESTARTING' };
     if (busy?.mode === 'terminating') return { key: 'terminating', label: 'TERMINATING' };
     return process.stopped ? { key: 'dormant', label: 'DORMANT' } : { key: 'live', label: 'LIVE' };
   }
@@ -4771,12 +4924,66 @@
   function scriptStatus(script) {
     const busy = state.busy.get(targetKey('script', script.file));
     if (busy?.mode === 'booting') return { key: 'booting', label: 'BOOTING' };
+    if (busy?.mode === 'restarting') return { key: 'booting', label: 'RESTARTING' };
     if (busy?.mode === 'terminating') return { key: 'terminating', label: 'TERMINATING' };
     return script.running ? { key: 'live', label: 'LIVE' } : { key: 'dormant', label: 'DORMANT' };
   }
 
   function statusBadge(status) {
     return `<span class="status-badge status-${status.key}">${status.label}</span>`;
+  }
+
+  function trafficControl({ tone, action, label, disabled, loading, openUrl, openPort }) {
+    const actionAttribute = action ? ` data-window-action="${esc(action)}"` : '';
+    const urlAttribute = openUrl ? ` data-open-url="${esc(openUrl)}"` : '';
+    const portAttribute = openPort ? ` data-open-port="${esc(openPort)}"` : '';
+    return `
+      <button class="traffic-control ${tone}" type="button" aria-label="${esc(label)}" title="${esc(label)}"
+        ${disabled ? 'disabled aria-disabled="true"' : ''}${loading ? ' data-state="loading" aria-busy="true"' : ''}${actionAttribute}${urlAttribute}${portAttribute}>
+      </button>
+    `;
+  }
+
+  function targetTrafficControls({ key, name, active, canStart, canRestart, protectedTarget = false, openUrl = '', openPort = 0 }) {
+    const busy = state.busy.get(key);
+    const unavailable = Boolean(busy);
+    const stopLabel = protectedTarget
+      ? `Stop unavailable for ${name}`
+      : active ? `Stop ${name}` : `${name} is already stopped`;
+    const restartLabel = protectedTarget || !canRestart
+      ? `Restart unavailable for ${name}`
+      : active ? `Restart ${name}` : `Start ${name} before restarting`;
+    const canOpen = active && Boolean(openUrl || openPort);
+    const goLabel = active
+      ? canOpen ? `Open ${name}` : `No detected URL for ${name}`
+      : canStart ? `Start ${name}` : `Start unavailable for ${name}`;
+    return `
+      <span class="traffic-controls" role="group" aria-label="${esc(`${name} window controls`)}">
+        ${trafficControl({
+          tone: 'stop',
+          action: 'stop',
+          label: stopLabel,
+          disabled: unavailable || !active || protectedTarget,
+          loading: busy?.mode === 'terminating',
+        })}
+        ${trafficControl({
+          tone: 'restart',
+          action: 'restart',
+          label: restartLabel,
+          disabled: unavailable || !active || !canRestart || protectedTarget,
+          loading: busy?.mode === 'restarting',
+        })}
+        ${trafficControl({
+          tone: 'go',
+          action: active ? '' : 'start',
+          label: goLabel,
+          disabled: unavailable || (active ? !canOpen : !canStart),
+          loading: busy?.mode === 'booting',
+          openUrl: canOpen ? openUrl : '',
+          openPort: canOpen && !openUrl ? openPort : 0,
+        })}
+      </span>
+    `;
   }
 
   function localModelState(model) {
@@ -5206,6 +5413,18 @@
     const lastSignal = formatDateTime(lastActionFor(key, project.lastActionAt || project.lastStartedAt));
     const isBusy = state.busy.has(key);
     const detectedUrls = [...new Set(project.components.flatMap((component) => component.detectedUrls || []))].slice(0, 5);
+    const preferredPort = projectPortsByKind(project, 'ui')[0]
+      || project.components.flatMap((component) => displayPorts(component))[0]
+      || 0;
+    const trafficControls = targetTrafficControls({
+      key,
+      name: project.name,
+      active,
+      canStart: !active,
+      canRestart: true,
+      openUrl: detectedUrls[0] || '',
+      openPort: preferredPort,
+    });
     const portDetected = active && !pids && project.components.some((component) => (
       component.running && component.livePorts?.length
     ));
@@ -5252,7 +5471,7 @@
         <div class="machine-screen">
           <div class="target-main">
             <div class="target-title">
-              <span class="machine-lights" aria-hidden="true"><span></span><span></span><span></span></span>
+              ${trafficControls}
               <h3>${esc(project.name)}</h3>
               ${project.type ? `<span class="target-type">${esc(project.type)}</span>` : ''}
               ${statusBadge(status)}
@@ -5306,6 +5525,15 @@
       || (defaultExpanded && !state.collapsedCards.has(key));
     const pids = active && process.pid ? String(process.pid) : '';
     const ports = (process.ports || []).map((entry) => entry.port);
+    const trafficControls = targetTrafficControls({
+      key,
+      name,
+      active,
+      canStart: stopped && Boolean(process.cmd),
+      canRestart: active && Boolean(process.cmd),
+      protectedTarget: Boolean(process.protected || process.self),
+      openPort: active ? ports[0] || 0 : 0,
+    });
     const processPath = compactPath(process.exePath || process.cwd || process.cmd || '');
     const lastSignal = formatDateTime(lastActionFor(key, process.stoppedAt || 0));
     const isBusy = state.busy.has(key);
@@ -5318,7 +5546,7 @@
         <div class="machine-screen">
           <div class="target-main">
             <div class="target-title">
-              <span class="machine-lights" aria-hidden="true"><span></span><span></span><span></span></span>
+              ${trafficControls}
               <h3>${esc(name)}</h3>
               <span class="target-type">${esc(stopped ? 'remembered signal' : process.name)}</span>
               ${statusBadge(status)}
@@ -5361,13 +5589,20 @@
     const terminateDisabled = isBusy || status.key === 'dormant';
     const pids = script.pids?.length ? script.pids.join(', ') : '';
     const lastSignal = formatDateTime(lastActionFor(key, script.modifiedAt));
+    const trafficControls = targetTrafficControls({
+      key,
+      name: script.name,
+      active,
+      canStart: !active,
+      canRestart: active,
+    });
 
     return `
       <article class="target-card ${status.key} ${expanded ? 'expanded' : 'compact'}" data-card-kind="script" data-file="${esc(script.file)}">
         <div class="machine-screen">
           <div class="target-main">
             <div class="target-title">
-              <span class="machine-lights" aria-hidden="true"><span></span><span></span><span></span></span>
+              ${trafficControls}
               <h3>${esc(script.name)}</h3>
               <span class="target-type">.au3</span>
               ${statusBadge(status)}
@@ -6029,6 +6264,34 @@
     `;
   }
 
+  function runningNowHtml(rows) {
+    if (!['projects', 'processes', 'scripts'].includes(state.view)) return '';
+    const running = rows.filter((row) => {
+      if (state.view === 'projects') return row.running || row.starting || state.busy.has(targetKey('project', row.name));
+      if (state.view === 'scripts') return row.running || state.busy.has(targetKey('script', row.file));
+      if (row.stopped) return false;
+      return !row.system || state.showSystem;
+    });
+    const visible = running.slice(0, 8);
+    const remaining = running.length - visible.length;
+    const names = visible.map((row) => {
+      const name = state.view === 'projects'
+        ? row.name
+        : state.view === 'scripts' ? row.name : row.label || row.name || `PID ${row.pid}`;
+      return `<span class="running-app" title="${esc(name)}">${esc(name)}</span>`;
+    }).join('');
+    const empty = 'NO LIVE APPLICATION SIGNALS';
+    return `
+      <section class="running-now" aria-label="Running applications" aria-live="polite">
+        <span class="running-now-label">RUNNING NOW <strong>${running.length}</strong></span>
+        <span class="running-now-list">
+          ${names || `<span class="running-now-empty">${empty}</span>`}
+          ${remaining > 0 ? `<span class="running-now-more">+${remaining} more</span>` : ''}
+        </span>
+      </section>
+    `;
+  }
+
   function renderTargets() {
     if (state.view === 'localInference') {
       $('emptyState').hidden = true;
@@ -6068,7 +6331,8 @@
     if (showingAgentOps) $('viewSubnav').innerHTML = agentOpsNavHtml();
     const agentOps = showingAgentOps ? agentOpsFindingsHtml() : '';
     const skillsRepo = state.view === 'skills' ? skillsRepoStatusHtml() : '';
-    $('targetList').innerHTML = friction + agentOps + skillsRepo + skillRouter + skillsSetup + rows.map((row) =>
+    const runningNow = runningNowHtml(rows);
+    $('targetList').innerHTML = runningNow + friction + agentOps + skillsRepo + skillRouter + skillsSetup + rows.map((row) =>
       state.view === 'projects' ? projectCard(row)
       : state.view === 'processes' ? processCard(row)
       : state.view === 'scripts' ? scriptCard(row)
@@ -7501,6 +7765,32 @@
     }
   }
 
+  async function restartProject(project) {
+    const key = targetKey('project', project.name);
+    if (projectStatus(project).key === 'dormant') {
+      toast(`${project.name} is stopped. Use green to start it.`);
+      return;
+    }
+    setBusy(key, 'restarting');
+    pushFeed('RESTART_REQUEST', `target=${slug(project.name)}`, 'warn');
+    try {
+      await postJson('/api/projects/stop', { name: project.name });
+      const result = await postJson('/api/projects/start', { name: project.name });
+      if (result.failed?.length) throw new Error(`Restart failed for ${result.failed.join(', ')}.`);
+      recordAction('project', project.name, 'RESTART', project.name);
+      pushFeed('RESTART_DISPATCHED', `target=${slug(project.name)} modules=${result.started?.length || 0}`, 'info');
+      toast(`${project.name} restarted.`);
+      await sleep(700);
+      await loadProjects(true);
+    } catch (error) {
+      pushFeed('RESTART_FAILED', `target=${slug(project.name)} reason=${error.message}`, 'error');
+      toast(error.message, true);
+    } finally {
+      clearBusy(key);
+      setTimeout(() => loadProjects(true), 900);
+    }
+  }
+
   async function initiateProcess(process) {
     const stopped = !!process.stopped;
     const id = stopped ? process.id : process.pid;
@@ -7602,6 +7892,33 @@
     }
   }
 
+  async function restartProcess(process) {
+    const key = targetKey('process', process.pid);
+    const name = process.label || process.name || 'unknown';
+    if (process.stopped || process.protected || process.self || !process.cmd) {
+      toast(`${name} cannot be restarted from its current signal.`, true);
+      return;
+    }
+    setBusy(key, 'restarting');
+    pushFeed('RESTART_REQUEST', `target=${slug(name)} pid=${process.pid}`, 'warn');
+    try {
+      const stopped = await postJson('/api/kill', { pid: process.pid });
+      if (!stopped.restartId) throw new Error(`${name} stopped, but no restart command was recorded.`);
+      await postJson('/api/start', { id: stopped.restartId });
+      recordAction('process', process.pid, 'RESTART', name);
+      pushFeed('RESTART_DISPATCHED', `target=${slug(name)} previous_pid=${process.pid}`, 'info');
+      toast(`${name} restarted.`);
+      await sleep(800);
+      await loadProcesses(true);
+    } catch (error) {
+      pushFeed('RESTART_FAILED', `target=${slug(name)} reason=${error.message}`, 'error');
+      toast(error.message, true);
+    } finally {
+      clearBusy(key);
+      setTimeout(() => loadProcesses(true), 900);
+    }
+  }
+
   async function forgetProcess(process) {
     try {
       await postJson('/api/forget', { id: process.id });
@@ -7682,6 +7999,31 @@
     } catch (error) {
       pushFeed('TERMINATION_FAILED', `target=${slug(script.name)}`, 'error');
       pushFeed('REASON', error.message, 'error');
+      toast(error.message, true);
+    } finally {
+      clearBusy(key);
+      setTimeout(() => loadScripts(true), 700);
+    }
+  }
+
+  async function restartScript(script) {
+    const key = targetKey('script', script.file);
+    if (!script.running) {
+      toast(`${script.name} is stopped. Use green to start it.`);
+      return;
+    }
+    setBusy(key, 'restarting');
+    pushFeed('RESTART_REQUEST', `target=${slug(script.name)}`, 'warn');
+    try {
+      await postJson('/api/scripts/stop', { file: script.file });
+      await postJson('/api/scripts/start', { file: script.file });
+      recordAction('script', script.file, 'RESTART', script.name);
+      pushFeed('RESTART_DISPATCHED', `target=${slug(script.name)}`, 'info');
+      toast(`${script.name} restarted.`);
+      await sleep(500);
+      await loadScripts(true);
+    } catch (error) {
+      pushFeed('RESTART_FAILED', `target=${slug(script.name)} reason=${error.message}`, 'error');
       toast(error.message, true);
     } finally {
       clearBusy(key);
@@ -8277,6 +8619,31 @@
     const portButton = event.target.closest('[data-open-port]');
     if (portButton) {
       await openUiInBrowser(portButton);
+      return;
+    }
+    const windowButton = event.target.closest('button[data-window-action]');
+    if (windowButton) {
+      if (windowButton.disabled) return;
+      const target = findCardTarget(windowButton);
+      if (!target) return;
+      const action = windowButton.dataset.windowAction;
+      const kind = windowButton.closest('[data-card-kind]')?.dataset.cardKind;
+
+      if (kind === 'project') {
+        if (action === 'start') await initiateProject(target);
+        if (action === 'stop') await terminateProject(target);
+        if (action === 'restart') await restartProject(target);
+        return;
+      }
+      if (kind === 'script') {
+        if (action === 'start') await initiateScript(target);
+        if (action === 'stop') await terminateScript(target);
+        if (action === 'restart') await restartScript(target);
+        return;
+      }
+      if (action === 'start') await initiateProcess(target);
+      if (action === 'stop') await terminateProcess(target);
+      if (action === 'restart') await restartProcess(target);
       return;
     }
     const button = event.target.closest('button[data-action]');

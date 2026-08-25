@@ -53,6 +53,21 @@ test('target cards expose compact details and truthful port groups', () => {
   assert.doesNotMatch(html, /\$\{actionButton\('project', 'terminate'[^}]+}\s*\$\{actionButton\('project', 'initiate'/);
 });
 
+test('target traffic lights expose stop, restart, and contextual go controls', () => {
+  assert.match(html, /class="traffic-controls" role="group"/);
+  assert.match(html, /class="traffic-control \$\{tone\}"/);
+  for (const action of ['stop', 'restart', 'start']) {
+    assert.match(html, new RegExp(`data-window-action="\\$\\{esc\\(action\\)\\}"|action: '${action}'`));
+  }
+  assert.match(html, /function runningNowHtml\(rows\)/);
+  assert.match(html, /aria-label="Running applications"/);
+  assert.match(html, /async function restartProject\(project\)/);
+  assert.match(html, /async function restartProcess\(process\)/);
+  assert.match(html, /async function restartScript\(script\)/);
+  assert.match(html, /data-window-action/);
+  assert.match(server, /restartId: entry\.cmd \? entry\.id : null/);
+});
+
 test('command palette includes setup, release, conditional update, and every preference family', () => {
   for (const verb of ['ADD', 'SCAN', 'RELEASE', 'UPDATE', 'THEME', 'DENSITY', 'MOTION', 'FONT', 'PANEL']) {
     assert.match(html, new RegExp(`verb: '${verb}'`));
