@@ -516,7 +516,7 @@ function deriveCwd(cmd, exePath) {
   return null;
 }
 
-// pid -> { cmd, exePath } ('' when unavailable). These are immutable per
+// pid -> { cmd, exePath, parentPid } (empty when unavailable). These are immutable per
 // process, so cache them and only query CIM for PIDs we haven't seen.
 const cmdCache = new Map();
 const cpuSamples = new Map();
@@ -530,7 +530,11 @@ async function getCommandLines(pids) {
   if (missing.length) {
     try {
       for (const row of await platform.processDetails(missing)) {
-        cmdCache.set(row.pid, { cmd: row.cmd || '', exePath: row.exePath || '' });
+        cmdCache.set(row.pid, {
+          cmd: row.cmd || '',
+          exePath: row.exePath || '',
+          parentPid: Number.isInteger(row.parentPid) ? row.parentPid : null,
+        });
       }
     } catch { /* access denied or CIM hiccup — fall back to exe names */ }
     for (const pid of missing) if (!cmdCache.has(pid)) cmdCache.set(pid, { cmd: '', exePath: '' });
@@ -662,13 +666,23 @@ async function getListeners() {
     getCommandLines(userPids),
     getProcessMetrics(listenerPids),
   ]);
+  const parentPids = [...new Set(userPids
+    .map((pid) => cmds.get(pid)?.parentPid)
+    .filter((pid) => Number.isInteger(pid) && pid > 0))];
+  let parents = new Map();
+  if (parentPids.length) {
+    try {
+      parents = new Map((await platform.processDetails(parentPids)).map((row) => [row.pid, row]));
+    } catch { /* matching still works from the listener command alone */ }
+  }
 
   const result = snapshot.listeners.map((info) => {
     const { pid } = info;
     const isProtected = platform.isProtectedProcess(pid, info.name, process.pid);
-    const { cmd, exePath } = cmds.get(pid) || { cmd: '', exePath: '' };
+    const { cmd, exePath, parentPid } = cmds.get(pid) || { cmd: '', exePath: '', parentPid: null };
+    const parent = parents.get(parentPid);
     const metric = metrics.get(pid) || {};
-    return {
+    const listener = {
       pid,
       name: info.name,
       label: pid === process.pid ? "Hacker's Lair" : friendlyLabel(cmd),
@@ -685,6 +699,10 @@ async function getListeners() {
       system: platform.isSystemProcess(pid, info.name, process.pid),
       ports: info.ports.slice().sort((left, right) => left.port - right.port),
     };
+    Object.defineProperty(listener, 'matchText', {
+      value: [cmd, parent?.cmd, parent?.exePath].filter(Boolean).join('\n'),
+    });
+    return listener;
   });
 
   // User processes first, then by lowest port.
@@ -786,10 +804,30 @@ async function refreshDoctor() {
 // port can still be told apart. Docker stacks can instead declare `ports`; those
 // ports become their authoritative readiness signal because Docker Desktop's
 // listener processes do not include the project path in their command lines.
+function containsCommandToken(command, token) {
+  const escaped = String(token).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(^|[\\s"'\\\\/])${escaped}(?=$|[\\s"'])`, 'i').test(command);
+}
+
+function matchesRelativeProjectScript(component, identity) {
+  if (!component.match || !component.cwd || !path.isAbsolute(component.match)) return false;
+  const projectDirectory = path.resolve(component.cwd);
+  const matchedFile = path.resolve(component.match);
+  const relative = path.relative(projectDirectory, matchedFile);
+  if (!relative || relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    return false;
+  }
+  return identity.includes(projectDirectory.toLowerCase())
+    && containsCommandToken(identity, path.basename(matchedFile));
+}
+
 function listenersFor(component, listeners) {
   const needle = String(component.match || component.cwd || '').toLowerCase();
   if (!needle) return [];
-  return listeners.filter((l) => (l.cmd || '').toLowerCase().includes(needle));
+  return listeners.filter((listener) => {
+    const identity = String(listener.matchText || listener.cmd || '').toLowerCase();
+    return identity.includes(needle) || matchesRelativeProjectScript(component, identity);
+  });
 }
 
 function configuredPorts(component) {

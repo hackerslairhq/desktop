@@ -42,8 +42,9 @@ test('Linux fixtures map ss listeners and ps process telemetry', () => {
   assert.equal(network.establishedByPort.get(3000), 1);
 
   const now = Date.UTC(2026, 0, 1);
-  const [process] = parsePs(' 812 node 204800 65 00:01:05 node server.js --port 3000', now);
+  const [process] = parsePs(' 812 400 node 204800 65 00:01:05 node server.js --port 3000', now);
   assert.equal(process.pid, 812);
+  assert.equal(process.parentPid, 400);
   assert.equal(process.workingSetKB, 204800);
   assert.equal(process.uptimeSeconds, 65);
   assert.equal(process.cpuTimeSeconds, 65);
